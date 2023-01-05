@@ -12,20 +12,36 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
+	"time"
 )
 
 var userHomeDir, _ = os.UserHomeDir()
 
+const DefaultDomain = "localhost"
 const DefaultPort = 50032
 const DefaultInterface = "0.0.0.0"
 const DefaultAppName = "authproxy"
 const DefaultConfigName = "nameserver"
+const DefaultTimeoutSecond = 2 * 3600
 
 var DefaultConfig = path.Join(userHomeDir, ".config/"+DefaultAppName+"/"+DefaultConfigName+".yaml")
 
 const DefaultConfigSearchPath0 = "/etc/authproxy"
 const DefaultConfigSearchPath1 = "./"
 const DefaultConfigSearchPath2 = "/config"
+
+var (
+	GlobalServerDesc *AuthProxyDesc
+	once             sync.Once
+)
+
+// SetGlobalDesc set the global desc for once
+func SetGlobalDesc(desc *AuthProxyDesc) {
+	once.Do(func() {
+		GlobalServerDesc = desc
+	})
+}
 
 type MySQLOpt struct {
 	Hostname    string `yaml:"hostname"`
@@ -39,11 +55,17 @@ type MySQLOpt struct {
 type NetworkOpt struct {
 	Port      int    `yaml:"port"`
 	Interface string `yaml:"interface"`
+	Domain    string `yaml:"domain"`
 }
 
 type LogOpt struct {
 	Level string `yaml:"port"`
 	Path  string `yaml:"path"`
+}
+
+type JWTOpt struct {
+	Secret  string `yaml:"secret"`
+	Timeout string `yaml:"timeout"`
 }
 
 type AuthProxyOpt struct {
@@ -52,6 +74,7 @@ type AuthProxyOpt struct {
 	Debug   bool       `yaml:"debug"`
 	Log     LogOpt     `yaml:"log"`
 	MySQL   MySQLOpt   `yaml:"mysql"`
+	JWT     JWTOpt     `yaml:"jwt"`
 }
 
 type AuthProxyDesc struct {
@@ -74,6 +97,7 @@ func NewAuthProxyOpt() AuthProxyOpt {
 		Network: NetworkOpt{
 			Port:      DefaultPort,
 			Interface: DefaultInterface,
+			Domain:    DefaultDomain,
 		},
 		Debug: false,
 		Log: LogOpt{
@@ -92,6 +116,7 @@ func NewAuthProxyOpt() AuthProxyOpt {
 
 func (o *AuthProxyDesc) Parse(cmd *cobra.Command) error {
 	vipCfg := viper.New()
+	vipCfg.SetDefault("network.domain", DefaultDomain)
 	vipCfg.SetDefault("network.port", DefaultPort)
 	vipCfg.SetDefault("network.interface", DefaultInterface)
 	vipCfg.SetDefault("debug", false)
@@ -102,6 +127,7 @@ func (o *AuthProxyDesc) Parse(cmd *cobra.Command) error {
 	vipCfg.SetDefault("mysql.database", "authproxy")
 	vipCfg.SetDefault("mysql.username", "authproxy")
 	vipCfg.SetDefault("mysql.password", "authproxy")
+	vipCfg.SetDefault("jwt.expired", DefaultTimeoutSecond*time.Second)
 
 	if configFileCmd, err := cmd.Flags().GetString("config"); err == nil && configFileCmd != "" {
 		vipCfg.SetConfigFile(configFileCmd)
@@ -144,6 +170,13 @@ func (o *AuthProxyDesc) Parse(cmd *cobra.Command) error {
 }
 
 func (o *AuthProxyDesc) PostParse() {
+	if o.Opt.UUID == "" {
+		o.Opt.UUID = utils.MustGenerateUUID()
+	}
+	if o.Opt.JWT.Secret == "" {
+		_, s := utils.MustGenerateAuthKeys()
+		o.Opt.JWT.Secret = s
+	}
 	if o.Opt.Debug || o.Opt.Log.Level == "debug" {
 		log.SetLevel(log.DebugLevel)
 	} else {

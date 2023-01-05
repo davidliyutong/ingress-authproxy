@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"ingress-auth-proxy/internal/authproxy/admin"
+	"ingress-auth-proxy/internal/authproxy/server"
 	"ingress-auth-proxy/internal/config"
 )
 
@@ -31,7 +31,7 @@ The parameters in the configuration file will be overwritten by the following or
 `,
 	Example: `  authproxy serve --config=path_to_config`,
 	Run: func(cmd *cobra.Command, args []string) {
-		admin.NewAuthProxyAdmin(cmd, args).PrepareRun().Run()
+		server.NewAuthProxyAdmin(cmd, args).PrepareRun().Run()
 	},
 }
 

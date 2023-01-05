@@ -1,4 +1,4 @@
-package admin
+package server
 
 type LayoutAdmin struct {
 	Self     string
@@ -9,20 +9,34 @@ type LayoutAdmin struct {
 }
 
 type LayoutAuth struct {
+	Self    string
+	Login   string
+	Refresh string
+}
+
+type LayoutIngressAuth struct {
 	Self string
 }
 
 type LayoutV1 struct {
-	Self  string
-	Admin LayoutAdmin
-	Auth  LayoutAuth
+	Self        string
+	Admin       LayoutAdmin
+	IngressAuth LayoutIngressAuth
 }
 
 type Layout struct {
-	V1 LayoutV1
+	Ping string
+	V1   LayoutV1
+	Auth LayoutAuth
 }
 
 var AuthProxyLayout = Layout{
+	Ping: "/ping",
+	Auth: LayoutAuth{
+		Self:    "/auth",
+		Login:   "login",
+		Refresh: "refresh",
+	},
 	V1: LayoutV1{
 		Self: "/v1",
 		Admin: LayoutAdmin{
@@ -32,7 +46,8 @@ var AuthProxyLayout = Layout{
 			Secrets:  "secrets",
 			Info:     "info",
 		},
-		Auth: LayoutAuth{
+
+		IngressAuth: LayoutIngressAuth{
 			Self: "/v1/auth",
 		},
 	},

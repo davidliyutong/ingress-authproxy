@@ -1,4 +1,4 @@
-package admin
+package server
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -28,6 +28,7 @@ func (a *authProxyAdmin) PrepareRun() AuthProxyAdmin {
 		os.Exit(1)
 		return nil
 	}
+	desc.PostParse()
 	a.desc = &desc
 	a.name = "authproxy"
 	a.runFunc = RunFunc
