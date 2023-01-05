@@ -3,39 +3,21 @@ package server
 import (
 	"database/sql"
 	"fmt"
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	userCtl "ingress-auth-proxy/internal/apiserver/admin/user/v1/controller"
+	userRepo "ingress-auth-proxy/internal/apiserver/admin/user/v1/repo"
+	userRepoMysql "ingress-auth-proxy/internal/apiserver/admin/user/v1/repo/mysql"
 	"ingress-auth-proxy/internal/config"
 	"ingress-auth-proxy/internal/utils"
 	auth "ingress-auth-proxy/pkg/auth/v1"
 	ping "ingress-auth-proxy/pkg/ping/v1"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
-
-func installJWTAuthGroup(router *gin.Engine) {
-	ginJWT, _ := auth.RegisterAuthModule(
-		router,
-		AuthProxyLayout.Auth.Self,
-		AuthProxyLayout.Auth.Login,
-		AuthProxyLayout.Auth.Refresh,
-		time.Second*2*3600,
-		func(username string, password string) bool {
-			return true
-		},
-		func(username string) bool {
-			return true
-		},
-		config.GlobalServerDesc.Opt.JWT.Secret,
-		config.GlobalServerDesc.Opt.Network.Domain)
-
-	/** 路由组 **/
-
-	/** 如果开启认证，则创建认证路由组，否则创建普通路由组 **/
-	_, _ = auth.CreateJWTAuthGroup(router, ginJWT, AuthProxyLayout.V1.Self)
-
-}
 
 func installPingGroup(router *gin.Engine) {
 	grp := router.Group(AuthProxyLayout.Ping)
@@ -43,10 +25,72 @@ func installPingGroup(router *gin.Engine) {
 	grp.GET("", controller.Info)
 }
 
+func installV1Group(router *gin.Engine, jwt *jwt.GinJWTMiddleware) {
+
+	/** 路由组 **/
+
+	/** 如果开启认证，则创建认证路由组，否则创建普通路由组 **/
+	_, _ = auth.CreateJWTAuthGroup(router, jwt, AuthProxyLayout.V1.Self)
+
+	v1API, _ := auth.CreateJWTAuthGroup(router, jwt, AuthProxyLayout.V1.Self)
+
+	adminPath, _ := filepath.Rel(AuthProxyLayout.V1.Self, AuthProxyLayout.V1.Admin.Self)
+	adminGrp := v1API.Group(adminPath)
+	{
+		userPath := AuthProxyLayout.V1.Admin.Users
+		userGrp := adminGrp.Group(userPath)
+		userRepoClient, err := userRepoMysql.Repo(&config.GlobalServerDesc.Opt.MySQL)
+		if err != nil {
+			log.Fatalf("failed to create Mysql repo: %s", err.Error())
+		}
+		userRepo.SetClient(userRepoClient)
+		userController := userCtl.NewController(userRepoClient)
+
+		userGrp.POST("", userController.Create)
+		userGrp.DELETE(":name", userController.Delete)
+		userGrp.PUT(":name", userController.Update)
+		userGrp.GET(":name", userController.Get)
+		userGrp.GET("", userController.List)
+	}
+}
+
+func installJWTGroup(router *gin.Engine) (*jwt.GinJWTMiddleware, error) {
+
+	ginJWT, _ := auth.RegisterAuthModule(
+		router,
+		AuthProxyLayout.Auth.Self,
+		AuthProxyLayout.Auth.Login,
+		AuthProxyLayout.Auth.Refresh,
+		time.Second*2*3600,
+		func(username string, password string) bool {
+			user, err := userRepo.Client().UserRepo().Get(username)
+			if err != nil {
+				return false
+			}
+
+			if err := user.Compare(password); err != nil {
+				return false
+			}
+
+			user.LoginedAt = time.Now()
+			_ = userRepo.Client().UserRepo().Update(user)
+
+			return true
+		},
+		func(username string) bool {
+			return true
+		},
+		config.GlobalServerDesc.Opt.JWT.Secret,
+		config.GlobalServerDesc.Opt.Network.Domain)
+	return ginJWT, nil
+
+}
+
 func installGinServer() *gin.Engine {
 	router := gin.Default()
+	ginJWT, _ := installJWTGroup(router)
 	installPingGroup(router)
-	installJWTAuthGroup(router)
+	installV1Group(router, ginJWT)
 	return router
 }
 

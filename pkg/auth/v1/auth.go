@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+const (
+	UsernameKey = "username"
+)
+
 type ClientLoginCredential struct {
 	AccessKey string `form:"accessKey" json:"accessKey" binding:"required"`
 	SecretKey string `form:"secretKey" json:"secretKey" binding:"required"`
@@ -18,7 +22,7 @@ type JWTResponse struct {
 }
 
 type User struct {
-	AccessKey string
+	Identity string
 }
 
 func RegisterAuthModule(
@@ -47,7 +51,7 @@ func RegisterAuthModule(
 
 			if authnFn(accessKey, secretKey) {
 				return &User{
-					AccessKey: accessKey,
+					Identity: accessKey,
 				}, nil
 			}
 
@@ -56,7 +60,7 @@ func RegisterAuthModule(
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*User); ok {
 				return jwt.MapClaims{
-					IdentityKeyStr: v.AccessKey,
+					IdentityKeyStr: v.Identity,
 				}
 			}
 			return jwt.MapClaims{}
@@ -64,12 +68,12 @@ func RegisterAuthModule(
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
 			return &User{
-				AccessKey: claims[IdentityKeyStr].(string),
+				Identity: claims[IdentityKeyStr].(string),
 			}
 		},
 		IdentityKey: IdentityKeyStr,
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*User); ok && authzFn(v.AccessKey) {
+			if v, ok := data.(*User); ok && authzFn(v.Identity) {
 				return true
 			}
 

@@ -12,7 +12,7 @@ type controller struct {
 	srv srv.Service
 }
 
-func NewController(repo repo.Repo, err error) Controller {
+func NewController(repo repo.Repo) Controller {
 	return &controller{
 		srv: srv.NewService(repo),
 	}

@@ -267,7 +267,10 @@ func GetBufferMD5(data []byte) (string, error) {
 }
 
 func MustGenerateUUID() string {
-	ul := uuid.NewV4()
+	ul, err := uuid.NewV4()
+	if err != nil {
+		panic(err)
+	}
 	return ul.String()
 }
 
