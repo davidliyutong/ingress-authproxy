@@ -1,0 +1,15 @@
+# Use root/example as user/password credentials
+version: '3.1'
+services:
+
+  db:
+    image: mysql:8.0.31
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_USER: authproxy
+      MYSQL_PASSWORD: authproxy
+      MYSQL_DATABASE: authproxy
+      MYSQL_ROOT_PASSWORD: hGVG75Rk15lP7k46506GS75rk579u9su # Randomly generated password

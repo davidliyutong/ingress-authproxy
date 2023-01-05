@@ -38,7 +38,7 @@ The parameters in the configuration file will be overwritten by the following or
 var initCmd = &cobra.Command{
 	Use: "init",
 	SuggestFor: []string{
-		"ini",
+		"ini", "in",
 	},
 	Short: "init create a configuration template",
 	Long: `init create a configuration template. This will generate uuids, default secrets and etc. 
@@ -53,13 +53,6 @@ If --yes / -y flag is present, the configuration will be overwrite without confi
   authproxy init --output /path/to/authproxy.yaml
   authproxy init -o /path/to/authproxy.yaml -y`,
 	Run: config.InitCfg,
-}
-
-var credentialCmd = &cobra.Command{
-	Use:     "warm",
-	Short:   "warm populates database with default values",
-	Example: `  authproxy warm`,
-	Run:     config.Warm,
 }
 
 func getRootCmd() *cobra.Command {
@@ -77,8 +70,6 @@ func getRootCmd() *cobra.Command {
 	initCmd.Flags().BoolP("yes", "y", false, "overwrite")
 	initCmd.Flags().StringP("output", "o", config.DefaultConfig, "specify output directory")
 	rootCmd.AddCommand(initCmd)
-
-	rootCmd.AddCommand(credentialCmd)
 
 	return rootCmd
 }

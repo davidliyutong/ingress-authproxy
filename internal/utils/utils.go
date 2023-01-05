@@ -15,6 +15,7 @@ import (
 	"io"
 	"math/rand"
 	"net"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -364,4 +365,16 @@ func FilterEmptyString(l []string) []string {
 		}
 	}
 	return l
+}
+
+func GetMySQLTZFromEnv() string {
+	tz := os.Getenv("TZ")
+	if tz == "" {
+		tz = "UTC"
+	}
+	return url.QueryEscape(tz)
+}
+
+func GetMySQLTime(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
 }

@@ -2,11 +2,14 @@ package config
 
 import (
 	"bufio"
+	"database/sql"
 	"errors"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/yaml.v3"
 	"ingress-auth-proxy/internal/utils"
 	"os"
@@ -24,6 +27,8 @@ const DefaultInterface = "0.0.0.0"
 const DefaultAppName = "authproxy"
 const DefaultConfigName = "nameserver"
 const DefaultTimeoutSecond = 2 * 3600
+const DefaultInitUsername = "admin"
+const DefaultInitPassword = "admin"
 
 var DefaultConfig = path.Join(userHomeDir, ".config/"+DefaultAppName+"/"+DefaultConfigName+".yaml")
 
@@ -64,10 +69,15 @@ type LogOpt struct {
 }
 
 type JWTOpt struct {
-	Secret  string `yaml:"secret"`
+	Secret  string `yaml:"-"`
 	Timeout string `yaml:"timeout"`
 }
 
+// InitOpt init the admin user
+type InitOpt struct {
+	Username string `yaml:"-"`
+	Password string `yaml:"-"`
+}
 type AuthProxyOpt struct {
 	UUID    string     `yaml:"uuid"`
 	Network NetworkOpt `yaml:"network"`
@@ -75,6 +85,7 @@ type AuthProxyOpt struct {
 	Log     LogOpt     `yaml:"log"`
 	MySQL   MySQLOpt   `yaml:"mysql"`
 	JWT     JWTOpt     `yaml:"jwt"`
+	Init    InitOpt    `yaml:"-"`
 }
 
 type AuthProxyDesc struct {
@@ -111,6 +122,10 @@ func NewAuthProxyOpt() AuthProxyOpt {
 			Username: "authproxy",
 			Password: "authproxy",
 		},
+		Init: InitOpt{
+			Username: "",
+			Password: "",
+		},
 	}
 }
 
@@ -128,6 +143,8 @@ func (o *AuthProxyDesc) Parse(cmd *cobra.Command) error {
 	vipCfg.SetDefault("mysql.username", "authproxy")
 	vipCfg.SetDefault("mysql.password", "authproxy")
 	vipCfg.SetDefault("jwt.expired", DefaultTimeoutSecond*time.Second)
+	vipCfg.SetDefault("init.username", DefaultInitPassword)
+	vipCfg.SetDefault("init.password", DefaultInitPassword)
 
 	if configFileCmd, err := cmd.Flags().GetString("config"); err == nil && configFileCmd != "" {
 		vipCfg.SetConfigFile(configFileCmd)
@@ -231,12 +248,114 @@ func InitCfg(cmd *cobra.Command, args []string) {
 	}
 }
 
+const warmSQLString = `
+DROP TABLE IF EXISTS user;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE user (
+id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+instanceID varchar(32) DEFAULT NULL,
+name varchar(45) NOT NULL,
+status int(1) DEFAULT 1 COMMENT '1:可用，0:不可用',
+nickname varchar(30) NOT NULL,
+password varchar(255) NOT NULL,
+email varchar(256) NOT NULL,
+phone varchar(20) DEFAULT NULL,
+isAdmin tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT '1: administrator\\\\n0: non-administrator',
+extendShadow longtext DEFAULT NULL,
+loginedAt timestamp NULL DEFAULT NULL COMMENT 'last login time',
+createdAt timestamp NOT NULL DEFAULT current_timestamp(),
+updatedAt timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+PRIMARY KEY (id),
+UNIQUE KEY idx_name (name),
+UNIQUE KEY instanceID_UNIQUE (instanceID)
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table secret
+--
+
+DROP TABLE IF EXISTS secret;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE secret (
+id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+instanceID varchar(32) DEFAULT NULL,
+name varchar(45) NOT NULL,
+username varchar(255) NOT NULL,
+secretID varchar(36) NOT NULL,
+secretKey varchar(255) NOT NULL,
+expires int(64) unsigned NOT NULL DEFAULT 1534308590,
+description varchar(255) NOT NULL,
+extendShadow longtext DEFAULT NULL,
+createdAt timestamp NOT NULL DEFAULT current_timestamp(),
+updatedAt timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+PRIMARY KEY (id),
+UNIQUE KEY instanceID_UNIQUE (instanceID)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table policy
+--
+
+DROP TABLE IF EXISTS policy;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE policy (
+id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+instanceID varchar(32) DEFAULT NULL,
+name varchar(45) NOT NULL,
+username varchar(255) NOT NULL,
+policyShadow longtext DEFAULT NULL,
+extendShadow longtext DEFAULT NULL,
+createdAt timestamp NOT NULL DEFAULT current_timestamp(),
+updatedAt timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+PRIMARY KEY (id),
+UNIQUE KEY instanceID_UNIQUE (instanceID)
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;`
+
 // Warm prepare the mysql connection
-func Warm(cmd *cobra.Command, args []string) {
-	desc := NewAuthProxyDesc()
-	err := desc.Parse(cmd)
+func Warm(db *sql.DB) error {
+	_, err := db.Query(warmSQLString)
+	return err
+}
+
+// Verify check the mysql database
+func Verify(db *sql.DB) bool {
+	_, check0 := db.Query("select * from " + "user" + ";")
+	log.Debugf("table user exist: %t", check0 == nil)
+	_, check1 := db.Query("select * from " + "policy" + ";")
+	log.Debugf("table policy exist: %t", check0 == nil)
+	_, check2 := db.Query("select * from " + "secret" + ";")
+	log.Debugf("table secret exist: %t", check0 == nil)
+
+	if check0 == nil && check1 == nil && check2 == nil {
+		return true
+	} else {
+		return false
+	}
+}
+
+func CreateDefaultAdminUser(db *sql.DB, username string, password string) error {
+	// check if the user table is empty
+	var count int
+	err := db.QueryRow("select count(*) from user;").Scan(&count)
 	if err != nil {
-		log.Errorln(err)
-		return
+		return err
+	}
+	if count > 0 {
+		log.Infoln("user table is not empty, skip the default admin user creation")
+		return nil
+	} else {
+		log.Infoln("user table is empty, create the default admin user")
+		encrypted, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		sqlString := fmt.Sprintf("insert into `user` values (%d, '%s', '%s', %d, '%s', '%s', '%s', '%s', %d, '%s', now(), '%s', '%s');",
+			0, "user", username, 1, "admin", encrypted, "admin@example.com", "+0000000000000", 1, "{}", utils.GetMySQLTime(time.Now()), utils.GetMySQLTime(time.Now()))
+		log.Debugf("sqlString: %s", sqlString)
+		_, err := db.Exec(sqlString)
+		return err
 	}
 }
