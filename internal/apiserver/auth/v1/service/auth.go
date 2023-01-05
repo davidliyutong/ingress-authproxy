@@ -1,22 +1,22 @@
 package v1
 
 import (
-	"ingress-auth-proxy/internal/apiserver/admin/v1/repo"
+	"ingress-auth-proxy/internal/apiserver/auth/v1/repo"
 )
 
-type AuthService interface {
+type AuthzService interface {
 }
 
-type authService struct {
+type authzService struct {
 	repo repo.Repo
 }
 
-func newAuthService(repo repo.Repo) AuthService {
-	return &authService{repo: repo}
+func newAuthzService(repo repo.Repo) AuthzService {
+	return &authzService{repo: repo}
 }
 
-func (s *service) NewAuthService() AuthService {
-	return newAuthService(s.repo)
+func (s *service) NewAuthzService() AuthzService {
+	return newAuthzService(s.repo)
 }
 
-var _ AuthService = (*authService)(nil)
+var _ AuthzService = (*authzService)(nil)

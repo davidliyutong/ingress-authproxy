@@ -1,7 +1,7 @@
 package repo
 
 type Repo interface {
-	AuthRepo() AuthRepo
+	AuthzRepo() AuthzRepo
 	Close() error
 }
 

@@ -6,7 +6,7 @@ import (
 )
 
 type repo struct {
-	authRepo repoInterface.AuthRepo
+	authzRepo repoInterface.AuthzRepo
 }
 
 //var _ repo3.BlobRepo = (*repo)(nil)
@@ -20,15 +20,15 @@ var (
 func Repo() (repoInterface.Repo, error) {
 	once.Do(func() {
 		r = repo{
-			authRepo: newUserRepo(),
+			authzRepo: newUserRepo(),
 		}
 	})
 
 	return r, nil
 }
 
-func (r repo) AuthRepo() repoInterface.AuthRepo {
-	return r.authRepo
+func (r repo) AuthzRepo() repoInterface.AuthzRepo {
+	return r.authzRepo
 }
 
 // Close closes the repo.
