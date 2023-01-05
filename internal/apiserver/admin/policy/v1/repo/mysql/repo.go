@@ -1,13 +1,11 @@
 package mysql
 
 import (
-	repo2 "ingress-auth-proxy/internal/apiserver/admin/v1/repo"
+	repoInterface "ingress-auth-proxy/internal/apiserver/admin/policy/v1/repo"
 	"sync"
 )
 
 type repo struct {
-	userRepo   UserRepo
-	secretRepo SecretRepo
 	policyRepo PolicyRepo
 }
 
@@ -19,11 +17,9 @@ var (
 )
 
 // Repo creates and returns the store client instance.
-func Repo() (repo2.Repo, error) {
+func Repo() (repoInterface.Repo, error) {
 	once.Do(func() {
 		r = repo{
-			userRepo:   newUserRepo(),
-			secretRepo: newSecretRepo(),
 			policyRepo: newPolicyRepo(),
 		}
 	})
@@ -31,15 +27,7 @@ func Repo() (repo2.Repo, error) {
 	return r, nil
 }
 
-func (r repo) UserRepo() repo2.UserRepo {
-	return r.userRepo
-}
-
-func (r repo) SecretRepo() repo2.SecretRepo {
-	return r.secretRepo
-}
-
-func (r repo) PolicyRepo() repo2.PolicyRepo {
+func (r repo) PolicyRepo() repoInterface.PolicyRepo {
 	return r.policyRepo
 }
 

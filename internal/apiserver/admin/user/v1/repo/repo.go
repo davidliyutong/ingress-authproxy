@@ -2,8 +2,6 @@ package repo
 
 type Repo interface {
 	UserRepo() UserRepo
-	SecretRepo() SecretRepo
-	PolicyRepo() PolicyRepo
 	Close() error
 }
 

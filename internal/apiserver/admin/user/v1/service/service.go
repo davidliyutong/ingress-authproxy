@@ -1,11 +1,11 @@
 package v1
 
 import (
-	"ingress-auth-proxy/internal/apiserver/admin/v1/repo"
+	"ingress-auth-proxy/internal/apiserver/admin/user/v1/repo"
 )
 
 type Service interface {
-	NewAdminService() AdminService
+	NewAdminService() UserService
 }
 
 type service struct {

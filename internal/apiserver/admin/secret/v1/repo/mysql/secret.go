@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	repoInterface "ingress-auth-proxy/internal/apiserver/admin/v1/repo"
+	repoInterface "ingress-auth-proxy/internal/apiserver/admin/secret/v1/repo"
 )
 
 type secretRepo struct {

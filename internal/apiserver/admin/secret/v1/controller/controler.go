@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"ingress-auth-proxy/internal/apiserver/admin/v1/repo"
-	srv "ingress-auth-proxy/internal/apiserver/admin/v1/service"
+	"ingress-auth-proxy/internal/apiserver/admin/secret/v1/repo"
+	srv "ingress-auth-proxy/internal/apiserver/admin/secret/v1/service"
 )
 
 type Controller interface {
