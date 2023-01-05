@@ -28,11 +28,12 @@ const DefaultConfigSearchPath1 = "./"
 const DefaultConfigSearchPath2 = "/config"
 
 type MySQLOpt struct {
-	Hostname string `yaml:"hostname"`
-	Port     int    `yaml:"port"`
-	Database string `yaml:"database"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
+	Hostname    string `yaml:"hostname"`
+	Port        int    `yaml:"port"`
+	Database    string `yaml:"database"`
+	Username    string `yaml:"username"`
+	Password    string `yaml:"password"`
+	Initialized bool   `yaml:"initialized"`
 }
 
 type NetworkOpt struct {
