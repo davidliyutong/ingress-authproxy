@@ -5,7 +5,7 @@ import (
 )
 
 type Service interface {
-	NewAdminService() UserService
+	NewUserService() UserService
 }
 
 type service struct {

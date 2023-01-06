@@ -5,6 +5,9 @@ import (
 )
 
 type UserRepo interface {
-	Get(username string) (*model.User, error)
+	Create(user *model.User) error
+	Delete(username string) error
 	Update(user *model.User) error
+	Get(username string) (*model.User, error)
+	List() (*model.UserList, error)
 }

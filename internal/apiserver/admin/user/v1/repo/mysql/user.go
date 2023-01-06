@@ -1,9 +1,8 @@
 package mysql
 
 import (
+	"errors"
 	"fmt"
-	"github.com/rebirthmonkey/go/pkg/errcode"
-	"github.com/rebirthmonkey/go/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -11,17 +10,61 @@ import (
 	repoInterface "ingress-auth-proxy/internal/apiserver/admin/user/v1/repo"
 	"ingress-auth-proxy/internal/config"
 	"ingress-auth-proxy/internal/utils"
+	"regexp"
 )
 
 type userRepo struct {
 	dbEngine *gorm.DB
 }
 
+func (u *userRepo) Create(user *model.User) error {
+	tmpUser := model.User{}
+	u.dbEngine.Where("name = ?", user.Name).Find(&tmpUser)
+	if tmpUser.Name != "" {
+		err := errors.New("the created user already exit")
+
+		log.Errorf("%+v", err)
+		return err
+	}
+
+	err := u.dbEngine.Create(&user).Error
+	if err != nil {
+		if match, _ := regexp.MatchString("Duplicate entry", err.Error()); match {
+			return errors.New("duplicate entry")
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (u *userRepo) Delete(username string) error {
+	if err := u.dbEngine.Where("name = ?", username).Delete(&model.User{}).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *userRepo) List() (*model.UserList, error) {
+	ret := &model.UserList{}
+
+	d := u.dbEngine.
+		Order("id desc").
+		Find(&ret.Items).
+		Offset(-1).
+		Limit(-1).
+		Count(&ret.TotalCount)
+
+	return ret, d.Error
+}
+
 func (u *userRepo) Update(user *model.User) error {
 	tmpUser := model.User{}
 	u.dbEngine.Where("name = ?", user.Name).Find(&tmpUser)
 	if tmpUser.Name == "" {
-		err := errors.WithCode(errcode.ErrRecordNotFound, "the update user not found")
+		err := errors.New("the update user not found")
 		log.Errorf("%s\n", err)
 		return err
 	}
@@ -33,22 +76,17 @@ func (u *userRepo) Update(user *model.User) error {
 	return nil
 }
 
-func (u userRepo) Get(username string) (*model.User, error) {
+func (u *userRepo) Get(username string) (*model.User, error) {
 	user := &model.User{}
 	err := u.dbEngine.Where("name = ?", username).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.WithCode(errcode.ErrRecordNotFound, "the get user not found.")
+			return nil, errors.New(fmt.Sprintf("the user: %v not found", username))
 		}
-		return nil, errors.WithCode(errcode.ErrDatabase, err.Error())
+		return nil, errors.New(err.Error())
 	}
 
 	return user, nil
-}
-
-type UserRepo interface {
-	Get(username string) (*model.User, error)
-	Update(user *model.User) error
 }
 
 var _ repoInterface.UserRepo = (*userRepo)(nil)

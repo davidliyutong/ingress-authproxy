@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
 	"github.com/sethvargo/go-password/password"
 	log "github.com/sirupsen/logrus"
@@ -15,6 +16,7 @@ import (
 	"io"
 	"math/rand"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -380,4 +382,26 @@ func GetMySQLTZFromEnv() string {
 
 func GetMySQLTime(t time.Time) string {
 	return t.Format("2006-01-02 15:04:05")
+}
+
+type ErrResponse struct {
+	// Code defines the business error code.
+	Code int `json:"code"`
+
+	// Message contains the detail of this message.
+	// This message is suitable to be exposed to external
+	Message string `json:"message"`
+}
+
+func WriteResponse(c *gin.Context, errCode int, err error, data interface{}) {
+	if err != nil {
+		log.Errorf("%#+v", err)
+		c.JSON(errCode, ErrResponse{
+			Code:    errCode,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, data)
 }

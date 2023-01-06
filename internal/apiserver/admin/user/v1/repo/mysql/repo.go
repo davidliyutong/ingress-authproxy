@@ -7,7 +7,7 @@ import (
 )
 
 type repo struct {
-	userRepo UserRepo
+	userRepo repoInterface.UserRepo
 }
 
 //var _ repo3.BlobRepo = (*repo)(nil)
