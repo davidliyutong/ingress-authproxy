@@ -1,73 +1,76 @@
 {
-    "name": "industrial-design",
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-        "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build",
-        "lint": "vue-cli-service lint",
-        "packager-mac-arm64": "electron-packager ./ App --platform=darwin --arch=arm64 --electron-version=12.0.0 --overwrite"
+  "name": "industrial-design",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "packager-mac-arm64": "electron-packager ./ App --platform=darwin --arch=arm64 --electron-version=12.0.0 --overwrite"
+  },
+  "dependencies": {
+    "@mdi/font": "^6.5.95",
+    "@mdi/js": "^6.5.95",
+    "apexcharts": "^3.32.0",
+    "axios": "^0.24.0",
+    "core-js": "^3.6.5",
+    "electron-packager": "^15.4.0",
+    "leaflet": "^1.7.1",
+    "leaflet.chinatmsproviders": "^3.0.4",
+    "leaflet.locatecontrol": "^0.76.0",
+    "leaflet.pm": "^2.2.0",
+    "mqtt": "^4.2.8",
+    "netcat": "^1.5.0",
+    "qs": "^6.11.0",
+    "roboto-fontface": "*",
+    "vue": "^2.6.11",
+    "vue-apexcharts": "^1.6.2",
+    "vue-leaflet-minimap": "^1.0.8",
+    "vue-router": "^3.5.3",
+    "vue2-leaflet": "^2.7.1",
+    "vuetify": "^2.6.1",
+    "vuex": "^3.6.2",
+    "xterm": "^4.15.0",
+    "xterm-addon-attach": "^0.6.0",
+    "xterm-addon-fit": "^0.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.0",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-router": "~4.5.0",
+    "@vue/cli-plugin-vuex": "~5.0.0",
+    "@vue/cli-service": "~4.5.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^6.2.2",
+    "material-design-icons-iconfont": "^6.1.1",
+    "sass": "~1.32.0",
+    "sass-loader": "^10.0.0",
+    "typeface-roboto": "^1.1.13",
+    "vue-cli-plugin-vuetify": "~2.4.5",
+    "vue-template-compiler": "^2.6.11",
+    "vuetify-loader": "^1.7.0"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
     },
-    "dependencies": {
-        "@mdi/font": "^6.5.95",
-        "@mdi/js": "^6.5.95",
-        "apexcharts": "^3.32.0",
-        "axios": "^0.24.0",
-        "core-js": "^3.6.5",
-        "electron-packager": "^15.4.0",
-        "leaflet": "^1.7.1",
-        "leaflet.chinatmsproviders": "^3.0.4",
-        "leaflet.locatecontrol": "^0.76.0",
-        "leaflet.pm": "^2.2.0",
-        "mqtt": "^4.2.8",
-        "netcat": "^1.5.0",
-        "roboto-fontface": "*",
-        "vue": "^2.6.11",
-        "vue-apexcharts": "^1.6.2",
-        "vue-leaflet-minimap": "^1.0.8",
-        "vue-router": "^3.5.3",
-        "vue2-leaflet": "^2.7.1",
-        "vuetify": "^2.6.1",
-        "xterm": "^4.15.0",
-        "xterm-addon-attach": "^0.6.0",
-        "xterm-addon-fit": "^0.5.0"
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
     },
-    "devDependencies": {
-        "@types/node": "^17.0.0",
-        "@vue/cli-plugin-babel": "~4.5.0",
-        "@vue/cli-plugin-eslint": "~4.5.0",
-        "@vue/cli-plugin-router": "~4.5.0",
-        "@vue/cli-service": "~4.5.0",
-        "babel-eslint": "^10.1.0",
-        "eslint": "^6.7.2",
-        "eslint-plugin-vue": "^6.2.2",
-        "material-design-icons-iconfont": "^6.1.1",
-        "sass": "~1.32.0",
-        "sass-loader": "^10.0.0",
-        "typeface-roboto": "^1.1.13",
-        "vue-cli-plugin-vuetify": "~2.4.5",
-        "vue-template-compiler": "^2.6.11",
-        "vuetify-loader": "^1.7.0"
-    },
-    "eslintConfig": {
-        "root": true,
-        "env": {
-            "node": true
-        },
-        "extends": [
-            "plugin:vue/essential",
-            "eslint:recommended"
-        ],
-        "parserOptions": {
-            "parser": "babel-eslint"
-        },
-        "rules": {
-            "no-unused-vars": "off"
-        }
-    },
-    "browserslist": [
-        "> 1%",
-        "last 2 versions",
-        "not dead"
-    ]
+    "rules": {
+      "no-unused-vars": "off"
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
 }

@@ -1,67 +1,107 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Dashboard from "./views/Dashboard.vue";
-import Sensors from "./views/Sensors.vue";
-import Settings from "./views/Settings.vue";
-import History from "./views/History.vue";
-import Automation from "./views/Automation.vue";
-import Map from "./views/Map.vue";
-import Debugger from "./views/Debugger.vue";
-import Profile from "./views/Profile.vue"
+import Dashboard from "./components/Dashboard.vue"
+import Users from "./components/Users.vue"
+import Policies from "./components/Policies.vue"
+import Secrets from "./components/Secrets.vue"
+
+import Login from "./components/Login.vue";
+import Profile from "@/components/Profile.vue";
+import Settings from "@/components/Settings.vue";
+import App from "@/App.vue";
+import Admin from "@/components/Admin.vue";
+
 Vue.use(VueRouter);
 
 const routes = [
     {
         path: "/",
-        name: "home",
-        component: Dashboard,
+        name: "login",
+        component: Login,
     },
     {
-        path: "/dashboard",
-        name: "dashboard",
-        component: Dashboard,
+        path: "/admin",
+        name: "admin",
+        redirect: "/admin/dashboard",
+        component: Admin,
+        meta: {
+            requiresAuth: true,
+        },
+        children: [
+            {
+                path: "/admin/dashboard",
+                name: "dashboard",
+                component: Dashboard,
+                meta: {
+                    requiresAuth: true,
+                }
+            },
+            {
+                path: "/admin/users",
+                name: "users",
+                component: Users,
+                meta: {
+                    requiresAuth: true,
+                }
+            },
+            {
+                path: "/admin/policies",
+                name: "policies",
+                component: Policies,
+                meta: {
+                    requiresAuth: true,
+                }
+            },
+            {
+                path: "/admin/secrets",
+                name: "secrets",
+                component: Secrets,
+                meta: {
+                    requiresAuth: true,
+                }
+            },
+            {
+                path: "/admin/profile",
+                name: "profile",
+                component: Profile,
+                meta: {
+                    requiresAuth: true,
+                }
+            },
+            {
+                path: "/admin/settings",
+                name: "settings",
+                component: Settings,
+                meta: {
+                    requiresAuth: true,
+                }
+            }
+        ]
     },
-    {
-        path: "/sensors",
-        name: "sensors",
-        component: Sensors,
-    },
-    {
-        path: "/settings",
-        name: "settings",
-        component: Settings,
-    },
-    {
-        path: "/history",
-        name: "history",
-        component: History,
-    },
-    {
-        path: "/automation",
-        name: "automation",
-        component: Automation,
-    },
-    {
-        path: "/map",
-        name: "map",
-        component: Map,
-    },
-    {
-        path: "/debugger",
-        name: "debugger",
-        component: Debugger,
-    },
-    {
-        path: "/profile",
-        name: "profile",
-        component: Profile,
-    },
+
 ];
 
 const router = new VueRouter({
     mode: "history",
     routes,
-    base : '/'
+    base: '/'
 });
+
+router.beforeEach((to, from, next) => {
+    let token = localStorage.getItem("token")
+    if (token == null || token === '') {
+        if (to.path === '/') {
+            next();
+        } else {
+            next({name: 'login'});
+        }
+    } else {
+        if (to.path === '/') {
+            next({name: 'admin'});
+        } else {
+            next();
+        }
+    }
+})
 
 export default router;
