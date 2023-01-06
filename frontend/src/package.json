@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "attach": "^0.0.3",
-    "xterm-addon-attach": "^0.6.0",
-    "xterm-addon-fit": "^0.5.0"
-  }
-}

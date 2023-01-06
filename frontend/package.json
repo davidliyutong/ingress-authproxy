@@ -28,7 +28,9 @@
         "vue-router": "^3.5.3",
         "vue2-leaflet": "^2.7.1",
         "vuetify": "^2.6.1",
-        "xterm": "^4.15.0"
+        "xterm": "^4.15.0",
+        "xterm-addon-attach": "^0.6.0",
+        "xterm-addon-fit": "^0.5.0"
     },
     "devDependencies": {
         "@types/node": "^17.0.0",

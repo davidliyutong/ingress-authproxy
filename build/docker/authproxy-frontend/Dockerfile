@@ -3,7 +3,7 @@ FROM node:15.13.0 AS builder
 WORKDIR /opt/build
 
 COPY frontend /opt/build
-RUN npm install && yarn build
+RUN yarn install && yarn build
 
 FROM nginx:1.23.3-alpine
 
