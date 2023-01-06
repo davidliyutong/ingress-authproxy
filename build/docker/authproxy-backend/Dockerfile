@@ -13,7 +13,7 @@ FROM ubuntu:20.04
 WORKDIR /opt/app
 
 COPY --from=builder /opt/build/authproxy ./authproxy
-COPY scripts/entrypoint/authproxy/entrypoint.sh ./entrypoint.sh
+COPY manifests/authproxy-backend/entrypoint/entrypoint.sh ./entrypoint.sh
 
 RUN chmod +x ./entrypoint.sh
 

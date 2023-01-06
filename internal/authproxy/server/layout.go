@@ -8,7 +8,7 @@ type LayoutAdmin struct {
 	Info     string
 }
 
-type LayoutAuth struct {
+type LayoutJWT struct {
 	Self    string
 	Login   string
 	Refresh string
@@ -22,21 +22,17 @@ type LayoutV1 struct {
 	Self        string
 	Admin       LayoutAdmin
 	IngressAuth LayoutIngressAuth
+	JWT         LayoutJWT
 }
 
 type Layout struct {
 	Ping string
 	V1   LayoutV1
-	Auth LayoutAuth
 }
 
 var AuthProxyLayout = Layout{
 	Ping: "/ping",
-	Auth: LayoutAuth{
-		Self:    "/auth",
-		Login:   "login",
-		Refresh: "refresh",
-	},
+
 	V1: LayoutV1{
 		Self: "/v1",
 		Admin: LayoutAdmin{
@@ -48,7 +44,12 @@ var AuthProxyLayout = Layout{
 		},
 
 		IngressAuth: LayoutIngressAuth{
-			Self: "/v1/auth",
+			Self: "/v1/ingress-auth",
+		},
+		JWT: LayoutJWT{
+			Self:    "/v1/jwt",
+			Login:   "login",
+			Refresh: "refresh",
 		},
 	},
 }

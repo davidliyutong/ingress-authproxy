@@ -59,9 +59,9 @@ func installJWTGroup(router *gin.Engine) (*jwt.GinJWTMiddleware, error) {
 
 	ginJWT, _ := auth.RegisterAuthModule(
 		router,
-		AuthProxyLayout.Auth.Self,
-		AuthProxyLayout.Auth.Login,
-		AuthProxyLayout.Auth.Refresh,
+		AuthProxyLayout.V1.JWT.Self,
+		AuthProxyLayout.V1.JWT.Login,
+		AuthProxyLayout.V1.JWT.Refresh,
 		time.Second*2*3600,
 		func(username string, password string) bool {
 			user, err := userRepo.Client().UserRepo().Get(username)
