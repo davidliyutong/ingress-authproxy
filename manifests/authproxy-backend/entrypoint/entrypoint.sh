@@ -6,4 +6,4 @@ if [ ! -f $CONFIG_DIR/config.yaml ]; then
     cat "$CONFIG_DIR/config.yaml"
 fi
 
-./authproxyserve --config "$CONFIG_DIR/config.yaml"
+./authproxy serve --config "$CONFIG_DIR/config.yaml"

@@ -1,0 +1,37 @@
+# Use root/example as user/password credentials
+version: '3.1'
+services:
+  db:
+    image: mysql:8.0.31
+    restart: unless-stopped
+#    ports:
+#      - "3306:3306"
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_USER: authproxy
+      MYSQL_PASSWORD: authproxy
+      MYSQL_DATABASE: authproxy
+      MYSQL_ROOT_PASSWORD: some_super_secret_password
+
+  authproxy-backend:
+    image: davidliyutong/ingress-authproxy-backend
+    restart: unless-stopped
+    ports:
+      - "50032:50032"
+    environment:
+      AUTHPROXY_MYSQL_DATABASE: authproxy
+      AUTHPROXY_MYSQL_USERNAME: authproxy
+      AUTHPROXY_MYSQL_PASSWORD: authproxy
+      AUTHPROXY_MYSQL_HOST: db
+      AUTHPROXY_MYSQL_PORT: 3306
+      AUTHPROXY_DEBUG: 1
+      AUTHPROXY_INIT_USERNAME: admin
+      AUTHPROXY_INIT_PASSWORD: admin
+
+  authproxy-frontend:
+    image: davidliyutong/ingress-authproxy-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      AUTHPROXY_BACKEND_URL: "http://authproxy-backend:50032"
