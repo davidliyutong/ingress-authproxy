@@ -1,11 +1,9 @@
 FROM node:15.13.0 AS builder
 
 WORKDIR /opt/build
-COPY frontend/package.json frontend/yarn.lock /opt/build/
-RUN npm install --registry=http://mirrors.cloud.tencent.com/npm/
 
 COPY frontend /opt/build
-RUN yarn build
+RUN npm install && yarn build
 
 FROM nginx:1.23.3-alpine
 

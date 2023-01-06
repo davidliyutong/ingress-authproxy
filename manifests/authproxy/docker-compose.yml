@@ -22,11 +22,11 @@ services:
       AUTHPROXY_MYSQL_DATABASE: authproxy
       AUTHPROXY_MYSQL_USERNAME: authproxy
       AUTHPROXY_MYSQL_PASSWORD: authproxy
-      AUTHPROXY_MYSQL_HOST: db
+      AUTHPROXY_MYSQL_HOSTNAME: db
       AUTHPROXY_MYSQL_PORT: 3306
-      AUTHPROXY_DEBUG: 1
-      AUTHPROXY_INIT_USERNAME: admin
-      AUTHPROXY_INIT_PASSWORD: admin
+#      AUTHPROXY_DEBUG: 1
+#      AUTHPROXY_INIT_USERNAME: admin
+#      AUTHPROXY_INIT_PASSWORD: admin
 
   authproxy-frontend:
     image: davidliyutong/ingress-authproxy-frontend

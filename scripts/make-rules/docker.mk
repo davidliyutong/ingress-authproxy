@@ -9,6 +9,7 @@ image.build.%:
 	$(eval IMAGE_PLAT := $(subst _,/,$(PLATFORM)))
 	@echo "===========> Building docker image $(IMAGE) $(VERSION) for $(IMAGE_PLAT)"
 	@docker build --platform $(IMAGE_PLAT) -t "$(AUTHOR)/$(_BINARY_PREFIX)$(IMAGE):$(VERSION)-$(GOOS)-$(GOARCH)" --file ./build/docker/$(IMAGE)/Dockerfile .
+	@docker tag "$(AUTHOR)/$(_BINARY_PREFIX)$(IMAGE):$(VERSION)-$(GOOS)-$(GOARCH)" "$(AUTHOR)/$(_BINARY_PREFIX)$(IMAGE):latest"
 
 .PHONY: image.build
 image.build: $(foreach image,${IMAGES},image.build.${image})
