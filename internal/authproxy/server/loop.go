@@ -32,10 +32,11 @@ func installV1Group(router *gin.Engine, jwt *jwt.GinJWTMiddleware) {
 	/** 如果开启认证，则创建认证路由组，否则创建普通路由组 **/
 	_, _ = auth.CreateJWTAuthGroup(router, jwt, AuthProxyLayout.V1.Self)
 
-	v1API, _ := auth.CreateJWTAuthGroup(router, jwt, AuthProxyLayout.V1.Self)
+	v1API := router.Group(AuthProxyLayout.V1.Self)
 
 	adminPath, _ := filepath.Rel(AuthProxyLayout.V1.Self, AuthProxyLayout.V1.Admin.Self)
 	adminGrp := v1API.Group(adminPath)
+	_ = auth.MakeJWTAuthGroup(adminGrp, jwt)
 	{
 		userPath := AuthProxyLayout.V1.Admin.Users
 		userGrp := adminGrp.Group(userPath)
@@ -69,6 +70,11 @@ func installJWTGroup(router *gin.Engine) (*jwt.GinJWTMiddleware, error) {
 			}
 
 			if err := user.Compare(password); err != nil {
+				return false
+			}
+
+			log.Debugln("user:", user.Name, "is admin:", user.IsAdmin)
+			if !(user.IsAdmin == 1) {
 				return false
 			}
 
