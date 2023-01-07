@@ -78,6 +78,9 @@
       <!--            <v-btn icon link to="/dashboard">-->
       <!--                <v-icon>mdi-home</v-icon>-->
       <!--            </v-btn>-->
+      <v-avatar color="indigo" size="36">
+        <span class="white--text headline">{{ username }}</span>
+      </v-avatar>
       <v-menu bottom left>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
@@ -96,6 +99,7 @@
           </v-list-item>
         </v-list>
       </v-menu>
+
     </v-app-bar>
 
     <!-- 根据应用组件来调整你的内容 -->
@@ -126,6 +130,8 @@
 
     <v-footer color="primary" app>
       <span class="white--text">&copy; 2023</span>
+<!--      <v-spacer></v-spacer>-->
+<!--      <span class="white&#45;&#45;text">{{ username }}</span>-->
     </v-footer>
   </v-app>
 </template>
@@ -141,11 +147,13 @@ export default {
       drawer: null,
       snackbar: false,
       snackbarText: "",
+      username: localStorage.getItem('username').slice(0,2)
     };
   },
   methods: {
     logout: function () {
       localStorage.removeItem('token');
+      localStorage.removeItem('username');
       this.$router.push('/')
     }
   },

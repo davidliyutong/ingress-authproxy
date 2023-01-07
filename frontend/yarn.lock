@@ -9625,6 +9625,11 @@ vuetify-loader@^1.7.0:
     file-loader "^6.2.0"
     loader-utils "^2.0.0"
 
+vuetify-message-snackbar@^0.2.7:
+  version "0.2.7"
+  resolved "https://registry.yarnpkg.com/vuetify-message-snackbar/-/vuetify-message-snackbar-0.2.7.tgz#82d89add0830627a13982dd736ccaef05a3b59ab"
+  integrity sha512-RwBbSIx1/7fN/ZTXj1IspQeVWSJHuWI3p7KU29/CgW3Z8TFUPEITz+2zu+Fp5TWInKSPCXG3eMivkjNCa5BLqQ==
+
 vuetify@^2.6.1:
   version "2.6.13"
   resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-2.6.13.tgz#6c7dd1a43b5cee0e474fbe840f0fe86439d54502"

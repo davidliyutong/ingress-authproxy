@@ -1,10 +1,10 @@
 package v1
 
 import (
-	"github.com/rebirthmonkey/go/pkg/metamodel"
 	"golang.org/x/crypto/bcrypt"
-	model "ingress-auth-proxy/internal/apiserver/admin/user/v1/model"
-	"ingress-auth-proxy/internal/apiserver/admin/user/v1/repo"
+	model "ingress-authproxy/internal/apiserver/admin/user/v1/model"
+	"ingress-authproxy/internal/apiserver/admin/user/v1/repo"
+	"ingress-authproxy/pkg/metamodel"
 	"time"
 )
 
@@ -75,9 +75,12 @@ func (u *userService) List() (*model.UserList, error) {
 				CreatedAt: user.CreatedAt,
 				UpdatedAt: user.UpdatedAt,
 			},
+			Name:     user.Name,
 			Nickname: user.Nickname,
 			Email:    user.Email,
 			Phone:    user.Phone,
+			IsAdmin:  user.IsAdmin,
+			Status:   user.Status,
 		})
 	}
 

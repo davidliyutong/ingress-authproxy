@@ -2,8 +2,8 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	"ingress-auth-proxy/internal/apiserver/admin/user/v1/repo"
-	srv "ingress-auth-proxy/internal/apiserver/admin/user/v1/service"
+	"ingress-authproxy/internal/apiserver/admin/user/v1/repo"
+	srv "ingress-authproxy/internal/apiserver/admin/user/v1/service"
 )
 
 type Controller interface {

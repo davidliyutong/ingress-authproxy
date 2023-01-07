@@ -1,5 +1,6 @@
 ROOT_PACKAGE = $(shell pwd)
-DEMO_DATA_DIR = $(ROOT_PACKAGE)/demo_data
+VERSION_PACKAGE = ingress-authproxy/pkg/version
+
 _BINARY_PREFIX = ingress-
 AUTHOR = davidliyutong
 

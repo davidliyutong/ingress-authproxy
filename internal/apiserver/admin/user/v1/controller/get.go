@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"ingress-auth-proxy/internal/utils"
+	"ingress-authproxy/internal/utils"
 	"net/http"
 )
 

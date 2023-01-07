@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"ingress-auth-proxy/internal/authproxy/server"
-	"ingress-auth-proxy/internal/config"
+	"ingress-authproxy/internal/authproxy/server"
+	"ingress-authproxy/internal/config"
 )
 
 var rootCmd = &cobra.Command{

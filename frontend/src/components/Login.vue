@@ -41,7 +41,7 @@
                       <v-btn
                           text
                           v-bind="attrs"
-                          @click="snackbar = false"
+                          @click="snackbarFail = false"
                       >
                         Close
                       </v-btn>
@@ -56,7 +56,7 @@
                       <v-btn
                           text
                           v-bind="attrs"
-                          @click="snackbar = false"
+                          @click="snackbarOK = false"
                       >
                         Close
                       </v-btn>
@@ -91,10 +91,9 @@ async function getToken (username, password) {
   try {
     await axios.post(loginUrl, paramStr
     ).then(response => {
-      let responseResult = JSON.stringify(response.data)
-      if (response.data.code === 200) {
-        localStorage.setItem('accessKey', username);
-        localStorage.setItem('token', responseResult.token)
+      if (response.status === 200) {
+        localStorage.setItem('username', username);
+        localStorage.setItem('token', response.data.token)
         loginSucceed = true
       }
     })
@@ -123,7 +122,7 @@ export default {
     login: async function () {
       let loginSucceed = await getToken(this.username,this.password)
 
-      console.log(loginSucceed)
+      // console.log(loginSucceed)
       if (loginSucceed !== true) {
           this.snackbarFail = true
       } else {

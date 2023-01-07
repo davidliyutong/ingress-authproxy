@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/yaml.v3"
-	"ingress-auth-proxy/internal/utils"
+	"ingress-authproxy/internal/utils"
 	"os"
 	"path"
 	"strings"

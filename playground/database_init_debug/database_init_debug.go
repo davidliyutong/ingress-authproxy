@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"ingress-auth-proxy/internal/config"
-	"ingress-auth-proxy/internal/utils"
+	"ingress-authproxy/internal/config"
+	"ingress-authproxy/internal/utils"
 	"os"
 )
 

@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"ingress-auth-proxy/internal/apiserver/admin/policy/v1/repo"
+	"ingress-authproxy/internal/apiserver/admin/policy/v1/repo"
 )
 
 type Service interface {

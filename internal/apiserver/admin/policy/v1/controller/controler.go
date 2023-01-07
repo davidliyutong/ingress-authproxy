@@ -1,11 +1,19 @@
 package v1
 
 import (
-	"ingress-auth-proxy/internal/apiserver/admin/policy/v1/repo"
-	srv "ingress-auth-proxy/internal/apiserver/admin/policy/v1/service"
+	"github.com/gin-gonic/gin"
+	"ingress-authproxy/internal/apiserver/admin/policy/v1/repo"
+	srv "ingress-authproxy/internal/apiserver/admin/policy/v1/service"
 )
 
+const UsernameKey = "username"
+
 type Controller interface {
+	Create(c *gin.Context)
+	Delete(c *gin.Context)
+	Update(c *gin.Context)
+	Get(c *gin.Context)
+	List(c *gin.Context)
 }
 
 type controller struct {

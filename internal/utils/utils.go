@@ -9,9 +9,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/marmotedu/component-base/pkg/util/stringutil"
 	uuid "github.com/satori/go.uuid"
 	"github.com/sethvargo/go-password/password"
 	log "github.com/sirupsen/logrus"
+	"github.com/speps/go-hashids"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/yaml.v3"
 	"io"
 	"math/rand"
@@ -26,6 +29,8 @@ import (
 	"sync"
 	"time"
 )
+
+const Alphabet36 = "abcdefghijklmnopqrstuvwxyz1234567890"
 
 func MustGenerateAuthKeys() (accessKey string, secretKey string) {
 	netInterfaces, err := net.Interfaces()
@@ -404,4 +409,27 @@ func WriteResponse(c *gin.Context, errCode int, err error, data interface{}) {
 	}
 
 	c.JSON(http.StatusOK, data)
+}
+
+func GetInstanceID(uid uint64, prefix string) string {
+	hd := hashids.NewData()
+	hd.Alphabet = Alphabet36
+	hd.MinLength = 6
+	hd.Salt = "x20k5x"
+
+	h, err := hashids.NewWithData(hd)
+	if err != nil {
+		panic(err)
+	}
+
+	i, err := h.Encode([]int{int(uid)})
+	if err != nil {
+		panic(err)
+	}
+
+	return prefix + stringutil.Reverse(i)
+}
+
+func CompareHashedPassword(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

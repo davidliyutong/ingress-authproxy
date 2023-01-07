@@ -1,81 +1,14 @@
 <template>
   <div>
     <v-container>
-      <v-card class="mx-auto my-4" max-width="400" dense>
-        <v-list-item two-line>
-          <v-list-item-content>
-            <v-list-item-title class="text-h5" id="location"> Shanghai </v-list-item-title>
-            <v-list-item-subtitle id="time-weather">Wen, Mostly sunny</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-
-        <v-card-text>
-          <v-row align="center">
-            <v-col cols="6" id="weather">
-              <v-img src="https://cdn.vuetifyjs.com/images/cards/sun.png" alt="Sunny image" width="92"></v-img>
-            </v-col>
-            <v-col class="text-h3" cols="6" id="temperature"> 13&deg;C </v-col>
-          </v-row>
-        </v-card-text>
-
-        <v-list-item>
-          <v-list-item-icon>
-            <v-icon>mdi-send</v-icon>
-          </v-list-item-icon>
-          <v-list-item-subtitle id="wind">3 km/h</v-list-item-subtitle>
-        </v-list-item>
-
-        <v-list-item>
-          <v-list-item-icon>
-            <v-icon>mdi-cloud</v-icon>
-          </v-list-item-icon>
-          <v-list-item-subtitle id="cloud">48%</v-list-item-subtitle>
-        </v-list-item>
-        <v-divider></v-divider>
-      </v-card>
-      <v-card class="mx-auto my-4" max-width="400" dense>
-        <v-card-title class="text-h5"> Alarm </v-card-title>
-
-        <v-card-text center>
-          <v-col cols="6">
-            <v-icon large>{{ alarmIcon }}</v-icon>
-          </v-col>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn class="mx-2 my-2" color="success" depressed @click="alarm_state = 1">Enable</v-btn>
-          <v-btn class="mx-2 my-2" color="error" depressed @click="alarm_state = 0">Disable</v-btn>
-        </v-card-actions>
-        <v-divider></v-divider>
-      </v-card>
-      <v-card class="mx-auto my-4" max-width="400" dense>
-        <v-card-title class="text-h5"> Light </v-card-title>
-
-        <v-card-text center>
-          <v-list>
-            <v-list-item>
-              <v-row cols="6">
-                Light 1
-                <v-spacer></v-spacer>
-                <v-switch v-model="switch1" @change="switchOnOff(switch1)"></v-switch>
-              </v-row>
-            </v-list-item>
-            <v-list-item>
-              <v-row cols="6">
-                Light 2
-                <v-spacer></v-spacer>
-                <v-switch v-model="switch2"></v-switch>
-              </v-row>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
-        <v-divider></v-divider>
-      </v-card>
-      <v-card class="mx-auto my-4" max-width="400">
-        <v-container center>
-          <apexchart width="100%" type="bar" :options="chartOptions" :series="series" center></apexchart>
-        </v-container>
-      </v-card>
+      <v-window>
+      <v-window-item :value="5">
+        <div class="pa-4 text-center">
+          <h3 class="text-h6 font-weight-light mb-2">Welcome, {{ username }}</h3>
+          <span class="text-caption grey--text">Have a great day !! </span>
+        </div>
+      </v-window-item>
+      </v-window>
     </v-container>
   </div>
 </template>
@@ -105,6 +38,7 @@ export default {
       },
     ],
     console: console,
+    username: localStorage.getItem("username")
   }),
 
   mounted: function () {

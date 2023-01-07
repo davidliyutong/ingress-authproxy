@@ -1,107 +1,166 @@
 <template>
-    <div>
-        <v-container fluid>
-            <v-col fluid>
-                <v-card class="mx-auto my-4" max-width="500">
-                    <v-card-title class="text-h6 font-weight-regular justify-space-between">
-                        <span>{{ currentTitle }}</span>
-                        <v-avatar color="primary lighten-2" class="subheading white--text" size="24" v-text="step"></v-avatar>
-                    </v-card-title>
+  <div>
+    <v-container fluid>
+      <v-tabs>
+        <v-tab>Info</v-tab>
+        <v-tab>Security</v-tab>
+        <v-tab-item key="1">
 
-                    <v-window v-model="step">
-                        <v-window-item :value="1">
-                            <v-card-text>
-                                <v-text-field label="Email" value="davidjeremienoe@sjtu.edu.cn"></v-text-field>
-                                <span class="text-caption grey--text text--darken-1"> This is the email you will use to login </span>
-                            </v-card-text>
-                        </v-window-item>
+        </v-tab-item>
+        <v-tab-item key="2">
+          <v-container>
+            <v-card class="mx-auto my-4">
+              <v-card-title class="text-h6 font-weight-regular justify-space-between">
+                <span>Change Password</span>
+              </v-card-title>
 
-                        <v-window-item :value="2">
-                            <v-card-text>
-                                <v-text-field label="Password" type="password"></v-text-field>
-                                <v-text-field label="Confirm Password" type="password"></v-text-field>
-                                <span class="text-caption grey--text text--darken-1"> Please enter a password for your account </span>
-                            </v-card-text>
-                        </v-window-item>
+              <v-card-text>
+                <v-form ref="form" @submit.prevent="changePassword()">
+                  <v-text-field
+                      v-model="password"
+                      name="username"
+                      label="New Password"
+                      type="password"
+                      placeholder="password"
+                      :rules="rules"
+                      required
+                  ></v-text-field>
 
-                        <v-window-item :value="3">
-                            <div class="pa-4 text-center">
-                                <h3 class="text-h6 font-weight-light mb-2">Welcome to Älykäs koti</h3>
-                                <span class="text-caption grey--text">Thanks for signing up!</span>
-                            </div>
-                        </v-window-item>
-                    </v-window>
+                  <v-text-field
+                      v-model="confirm"
+                      name="confirm"
+                      label="Confirm Password"
+                      type="password"
+                      placeholder="confirm"
+                      required
+                  ></v-text-field>
+                  <v-card-actions>
+                    <v-btn class="mt-4" @click="resetForm">Clear</v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn type="submit" class="mt-4" color="primary" value="log in">Change Password</v-btn>
+                  </v-card-actions>
+                </v-form>
+              </v-card-text>
+            </v-card>
+          </v-container>
 
-                    <v-card-actions>
-                        <v-btn :disabled="step === 1" text @click="step--"> Clear </v-btn>
-                        <v-spacer></v-spacer>
-                        <v-btn :disabled="step === 3" color="primary" depressed @click="step++"> Next </v-btn>
-                    </v-card-actions>
-                </v-card>
-                <v-spacer></v-spacer>
-                <v-card class="mx-auto my-4" max-width="500">
-                    <v-card-title class="text-h6 font-weight-regular justify-space-between">
-                        <span>Sign In</span>
-                    </v-card-title>
-
-                    <v-window>
-                        <v-window-item>
-                            <v-card-text>
-                                <v-text-field label="Email" value="davidjeremienoe@sjtu.edu.cn"></v-text-field>
-                                <span class="text-caption grey--text text--darken-1"> This is the email you use to login </span>
-                                <v-text-field label="Password" type="password"></v-text-field>
-                                <span class="text-caption grey--text text--darken-1"> Password for your account </span>
-                            </v-card-text>
-                        </v-window-item>
-                    </v-window>
-
-                    <v-card-actions>
-                        <v-btn text @click="resetForm"> Clear </v-btn>
-                        <v-spacer></v-spacer>
-                        <v-btn color="primary" depressed @click="login"> Login </v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-col>
-        </v-container>
-    </div>
+        </v-tab-item>
+      </v-tabs>
+    </v-container>
+  </div>
 </template>
 
 <script>
+
+import axios from "axios";
+
+function getRootPath() {
+  return window.location.protocol + '//' + window.location.host;
+}
+
+async function getUser(username) {
+  let targetURL = getRootPath() + "/v1/admin/users/" + username;
+  let user = null
+  try {
+    await axios.get(targetURL,
+    ).then(response => {
+      if (response.status === 200) {
+        user = response.data
+      }
+    })
+  } catch (err) {
+    user = null
+  }
+
+  return user
+}
+
+async function updateUser(user) {
+  if (user === null) {
+    return false
+  }
+  let targetURL = getRootPath() + "/v1/admin/users/" + user.name;
+  let succeed = false;
+  try {
+    await axios.put(targetURL, JSON.stringify(user)
+    ).then(response => {
+      if (response.status === 200) {
+        succeed = true
+      }
+    })
+  } catch (err) {
+    succeed = false
+  }
+
+  return succeed
+}
+
 export default {
-    name: "Profile",
-    data: () => ({
-        rules: {
-            required: (value) => !!value || "Required.",
-            counter: (value) => value.length <= 20 || "Max 20 characters",
-            email: (value) => {
-                const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-                return pattern.test(value) || "Invalid e-mail.";
-            },
-        },
-        step: 1,
-    }),
-    methods: {
-        resetForm() {},
-        login() {},
-        setGlobalTitle: function () {
-            var myElement = document.getElementById("global-title");
-            myElement.textContent = "Profile";
-        },
+  name: "Profile",
+  data: () => ({
+    password: "",
+    confirm: "",
+  }),
+  methods: {
+    resetForm: function () {
+      this.$refs.form.reset()
     },
-    mounted: function () {
-        this.setGlobalTitle();
+    changePassword: async function () {
+      if (this.$refs.form.validate() === false){
+
+        this.$message.bottom().error('New Password Mismatch')
+        return
+      }
+      let user = await getUser(localStorage.getItem('username'))
+      if (user != null) {
+        user.password = this.password
+        // console.log(user)
+        let succeed = await updateUser(user)
+        if (succeed) {
+          this.$message.bottom().success('Password Changed')
+        }
+      } else {
+        this.$message.bottom().error('Password Change Failed')
+      }
     },
-    computed: {
-        currentTitle() {
-            switch (this.step) {
-                case 1:
-                    return "Sign-up";
-                case 2:
-                    return "Create a password";
-                default:
-                    return "Account created";
-            }
-        },
+    setGlobalTitle: function () {
+      var myElement = document.getElementById("global-title");
+      myElement.textContent = "Profile";
     },
+    validateField: function () {
+      this.$refs.form.validate()
+    }
+    ,
+  },
+  mounted: function () {
+    this.setGlobalTitle();
+  },
+  computed: {
+    rules() {
+      const rules = []
+      rules.push(v => (v || '').length <= 32 ||
+          'A maximum of 32 characters is allowed')
+
+      rules.push(v => (v || '').indexOf(' ') < 0 ||
+          'No spaces are allowed')
+
+      if (this.confirm) {
+        rules.push(v => (!!v && v) === this.confirm ||
+            'Values do not match')
+      }
+
+      if (this.password) {
+        rules.push(v => (!!v && v) === this.password ||
+            'Values do not match')
+      }
+
+      return rules
+    },
+  },
+
+  watch: {
+    confirm: 'validateField',
+    password: 'validateField',
+  },
 };
 </script>

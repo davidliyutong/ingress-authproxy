@@ -1,12 +1,13 @@
 package mysql
 
 import (
-	repoInterface "ingress-auth-proxy/internal/apiserver/admin/policy/v1/repo"
+	repoInterface "ingress-authproxy/internal/apiserver/admin/policy/v1/repo"
+	"ingress-authproxy/internal/config"
 	"sync"
 )
 
 type repo struct {
-	policyRepo PolicyRepo
+	policyRepo repoInterface.PolicyRepo
 }
 
 //var _ repo3.BlobRepo = (*repo)(nil)
@@ -17,10 +18,10 @@ var (
 )
 
 // Repo creates and returns the store client instance.
-func Repo() (repoInterface.Repo, error) {
+func Repo(opt *config.MySQLOpt) (repoInterface.Repo, error) {
 	once.Do(func() {
 		r = repo{
-			policyRepo: newPolicyRepo(),
+			policyRepo: newPolicyRepo(opt),
 		}
 	})
 

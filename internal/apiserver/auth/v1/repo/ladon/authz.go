@@ -1,7 +1,7 @@
 package ladon
 
 import (
-	repoInterface "ingress-auth-proxy/internal/apiserver/auth/v1/repo"
+	repoInterface "ingress-authproxy/internal/apiserver/auth/v1/repo"
 )
 
 type authzRepo struct {

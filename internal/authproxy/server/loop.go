@@ -6,13 +6,18 @@ import (
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	userCtl "ingress-auth-proxy/internal/apiserver/admin/user/v1/controller"
-	userRepo "ingress-auth-proxy/internal/apiserver/admin/user/v1/repo"
-	userRepoMysql "ingress-auth-proxy/internal/apiserver/admin/user/v1/repo/mysql"
-	"ingress-auth-proxy/internal/config"
-	"ingress-auth-proxy/internal/utils"
-	auth "ingress-auth-proxy/pkg/auth/v1"
-	ping "ingress-auth-proxy/pkg/ping/v1"
+	policyCtl "ingress-authproxy/internal/apiserver/admin/policy/v1/controller"
+	policyRepo "ingress-authproxy/internal/apiserver/admin/policy/v1/repo"
+	policyRepoMysql "ingress-authproxy/internal/apiserver/admin/policy/v1/repo/mysql"
+	userCtl "ingress-authproxy/internal/apiserver/admin/user/v1/controller"
+	userRepo "ingress-authproxy/internal/apiserver/admin/user/v1/repo"
+	userRepoMysql "ingress-authproxy/internal/apiserver/admin/user/v1/repo/mysql"
+	"ingress-authproxy/internal/config"
+	"ingress-authproxy/internal/utils"
+	auth "ingress-authproxy/pkg/auth/v1"
+	ping "ingress-authproxy/pkg/ping/v1"
+	"ingress-authproxy/pkg/version"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -23,6 +28,18 @@ func installPingGroup(router *gin.Engine) {
 	grp := router.Group(AuthProxyLayout.Ping)
 	controller := ping.NewController(nil)
 	grp.GET("", controller.Info)
+}
+
+// InstallAPIs install generic apis.
+func installMiscAPIs(router *gin.Engine) {
+	router.GET("/healthz", func(c *gin.Context) {
+		c.String(http.StatusOK, "OK")
+	})
+
+	router.GET("/version", func(c *gin.Context) {
+		c.String(http.StatusOK, version.GitVersion)
+	})
+
 }
 
 func installV1Group(router *gin.Engine, jwt *jwt.GinJWTMiddleware) {
@@ -40,18 +57,35 @@ func installV1Group(router *gin.Engine, jwt *jwt.GinJWTMiddleware) {
 	{
 		userPath := AuthProxyLayout.V1.Admin.Users
 		userGrp := adminGrp.Group(userPath)
-		userRepoClient, err := userRepoMysql.Repo(&config.GlobalServerDesc.Opt.MySQL)
-		if err != nil {
-			log.Fatalf("failed to create Mysql repo: %s", err.Error())
-		}
-		userRepo.SetClient(userRepoClient)
-		userController := userCtl.NewController(userRepoClient)
+		{
+			userRepoClient, err := userRepoMysql.Repo(&config.GlobalServerDesc.Opt.MySQL)
+			if err != nil {
+				log.Fatalf("failed to create Mysql repo: %s", err.Error())
+			}
+			userRepo.SetClient(userRepoClient)
+			userController := userCtl.NewController(userRepoClient)
 
-		userGrp.POST("", userController.Create)
-		userGrp.DELETE(":name", userController.Delete)
-		userGrp.PUT(":name", userController.Update)
-		userGrp.GET(":name", userController.Get)
-		userGrp.GET("", userController.List)
+			userGrp.POST("", userController.Create)
+			userGrp.DELETE(":name", userController.Delete)
+			userGrp.PUT(":name", userController.Update)
+			userGrp.GET(":name", userController.Get)
+			userGrp.GET("", userController.List)
+		}
+		policyPath := AuthProxyLayout.V1.Admin.Policies
+		policyGrp := adminGrp.Group(policyPath)
+		{
+			policyRepoClient, _ := policyRepoMysql.Repo(&config.GlobalServerDesc.Opt.MySQL)
+			policyRepo.SetClient(policyRepoClient)
+
+			policyController := policyCtl.NewController(policyRepoClient)
+
+			policyGrp.POST("", policyController.Create)
+			policyGrp.DELETE(":name", policyController.Delete)
+			policyGrp.PUT(":name", policyController.Update)
+			policyGrp.GET(":name", policyController.Get)
+			policyGrp.GET("", policyController.List)
+		}
+
 	}
 }
 
@@ -165,6 +199,7 @@ func RunFunc(a AuthProxyAdmin) {
 	}
 	ginEngine := installGinServer()
 
+	log.Infoln("version:", version.GitVersion)
 	log.Infoln("uuid:", aVal.desc.Opt.UUID)
 	log.Infoln("domain:", aVal.desc.Opt.Network.Domain)
 	log.Infoln("port:", aVal.desc.Opt.Network.Port)

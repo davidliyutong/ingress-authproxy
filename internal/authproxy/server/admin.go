@@ -3,7 +3,7 @@ package server
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"ingress-auth-proxy/internal/config"
+	"ingress-authproxy/internal/config"
 	"os"
 )
 

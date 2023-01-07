@@ -1,9 +1,8 @@
 package v1
 
 import (
-	"github.com/rebirthmonkey/go/pkg/auth"
-	"github.com/rebirthmonkey/go/pkg/metamodel"
-	"github.com/rebirthmonkey/go/pkg/util"
+	"ingress-authproxy/internal/utils"
+	"ingress-authproxy/pkg/metamodel"
 	"time"
 
 	"gorm.io/gorm"
@@ -38,14 +37,14 @@ func (u *User) TableName() string {
 
 // Compare with the plain text password. Returns true if it's the same as the encrypted one (in the `User` struct).
 func (u *User) Compare(pwd string) (err error) {
-	err = auth.Compare(u.Password, pwd)
+	err = utils.CompareHashedPassword(u.Password, pwd)
 
 	return
 }
 
 // AfterCreate run after create database record.
 func (u *User) AfterCreate(tx *gorm.DB) error {
-	u.InstanceID = util.GetInstanceID(u.ID, "user-")
+	u.InstanceID = utils.GetInstanceID(u.ID, "user-")
 
 	return tx.Save(u).Error
 }

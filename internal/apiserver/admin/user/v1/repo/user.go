@@ -1,7 +1,7 @@
 package repo
 
 import (
-	model "ingress-auth-proxy/internal/apiserver/admin/user/v1/model"
+	model "ingress-authproxy/internal/apiserver/admin/user/v1/model"
 )
 
 type UserRepo interface {

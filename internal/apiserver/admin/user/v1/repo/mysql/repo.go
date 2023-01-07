@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	repoInterface "ingress-auth-proxy/internal/apiserver/admin/user/v1/repo"
-	"ingress-auth-proxy/internal/config"
+	repoInterface "ingress-authproxy/internal/apiserver/admin/user/v1/repo"
+	"ingress-authproxy/internal/config"
 	"sync"
 )
 

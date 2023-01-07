@@ -6,10 +6,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	model "ingress-auth-proxy/internal/apiserver/admin/user/v1/model"
-	repoInterface "ingress-auth-proxy/internal/apiserver/admin/user/v1/repo"
-	"ingress-auth-proxy/internal/config"
-	"ingress-auth-proxy/internal/utils"
+	model "ingress-authproxy/internal/apiserver/admin/user/v1/model"
+	repoInterface "ingress-authproxy/internal/apiserver/admin/user/v1/repo"
+	"ingress-authproxy/internal/config"
+	"ingress-authproxy/internal/utils"
 	"regexp"
 )
 
@@ -107,4 +107,13 @@ func newUserRepo(opt *config.MySQLOpt) repoInterface.UserRepo {
 		return nil
 	}
 	return &userRepo{dbEngine: db}
+}
+
+func (p *userRepo) close() error {
+	dbEngine, err := p.dbEngine.DB()
+	if err != nil {
+		return err
+	}
+
+	return dbEngine.Close()
 }

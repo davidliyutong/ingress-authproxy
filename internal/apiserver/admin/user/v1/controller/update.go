@@ -3,8 +3,8 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	model "ingress-auth-proxy/internal/apiserver/admin/user/v1/model"
-	"ingress-auth-proxy/internal/utils"
+	model "ingress-authproxy/internal/apiserver/admin/user/v1/model"
+	"ingress-authproxy/internal/utils"
 	"net/http"
 )
 

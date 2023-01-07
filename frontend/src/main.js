@@ -2,7 +2,6 @@ import Vue from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify'
 import router from './router.js'
-import {Axios} from "axios";
 
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
@@ -39,11 +38,15 @@ L.Icon.Default.mergeOptions({
 
 // axios
 import axios from "axios";
-
-Vue.prototype.$axios = axios;
+// Vue.prototype.$axios = axios;
+import http from "./axios";
+Vue.prototype.$http = Vue.$http = http;
 
 // Vuex
 import store from './store'
+
+import message from 'vuetify-message-snackbar';
+Vue.use(message)
 
 
 new Vue({
@@ -52,33 +55,4 @@ new Vue({
     store,
     render: h => h(App)
 }).$mount('#app')
-
-// Axios.interceptors.request.use(config => {
-//         // eslint-disable-next-line no-empty
-//         if (config.push !== '/')  {
-//             if (localStorage.getItem('token')) {
-//                 config.headers.token = localStorage.getItem('token');
-//             }
-//         }
-//         return config;
-//     },
-//     error => {
-//         return Promise.reject(error);
-//     });
-//
-// Axios.interceptors.response.use(response => {
-//         console.log('response：'+response.data.code)
-//         if (response.data.code !== 200) {
-//             this.snackbarText = "Token Expired"
-//             this.snackbar = true
-//             localStorage.removeItem('token');
-//             router.push({name: '/'});
-//         } else {
-//             return response
-//         }
-//     },
-//     error => {
-//         return Promise.reject(error);
-//     })
-
 
