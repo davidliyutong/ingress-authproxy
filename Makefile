@@ -24,9 +24,9 @@ clean:
 
 
 
-.PHONY: demo
+.PHONY: demo demo.start
 demo:
-	@cd manifests/authproxy && docker-compose up
+	@cd manifests/authproxy && docker-compose up || docker-compose down
 
 .PHONY: demo.stop
 demo.stop:
