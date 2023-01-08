@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
@@ -16,6 +17,14 @@ type policyRepo struct {
 }
 
 func (p *policyRepo) Create(policy *model.Policy) error {
+	var tmpPolicy model.Policy
+	p.dbEngine.Where("name = ?", policy.Name).Find(&tmpPolicy)
+	if tmpPolicy.Name != "" {
+		err := errors.New("the policy with same name already exit")
+		log.Errorf("%+v", err)
+		return err
+	}
+
 	if err := p.dbEngine.Create(&policy).Error; err != nil {
 		return err
 	}
@@ -23,13 +32,8 @@ func (p *policyRepo) Create(policy *model.Policy) error {
 	return nil
 }
 
-func (p *policyRepo) Delete(username string, policyName string) error {
-	err := p.dbEngine.Where("username = ? and name = ?", username, policyName).Delete(&model.Policy{}).Error
-	return err
-}
-
-func (p *policyRepo) DeleteByUser(username string) error {
-	err := p.dbEngine.Where("username = ?", username).Delete(&model.Policy{}).Error
+func (p *policyRepo) Delete(policyName string) error {
+	err := p.dbEngine.Where("name = ?", policyName).Delete(&model.Policy{}).Error
 	return err
 }
 
@@ -38,27 +42,19 @@ func (p *policyRepo) Update(policy *model.Policy) error {
 	return err
 }
 
-func (p *policyRepo) Get(username string, policyName string) (*model.Policy, error) {
+func (p *policyRepo) Get(policyName string) (*model.Policy, error) {
 	policy := &model.Policy{}
-	err := p.dbEngine.Where("username = ? and name= ?", username, policyName).First(&policy).Error
+	err := p.dbEngine.Where("name= ?", policyName).First(&policy).Error
 	if err != nil {
 		return nil, err
 	}
 	return policy, nil
 }
 
-func (p *policyRepo) List(username string) (*model.PolicyList, error) {
+func (p *policyRepo) List() (*model.PolicyList, error) {
 	ret := &model.PolicyList{}
 
-	// TODO: find out why this code is not working
-	var engin *gorm.DB
-	if username != "" {
-		engin = p.dbEngine.Where("username = ?", username)
-	} else {
-		engin = p.dbEngine
-	}
-
-	d := engin.
+	d := p.dbEngine.
 		Order("id desc").
 		Find(&ret.Items).
 		Offset(-1).

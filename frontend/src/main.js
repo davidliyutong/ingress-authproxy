@@ -46,7 +46,10 @@ Vue.prototype.$http = Vue.$http = http;
 import store from './store'
 
 import message from 'vuetify-message-snackbar';
-Vue.use(message)
+Vue.use(message, {
+    vuetifyInstance: vuetify,
+})
+
 
 
 new Vue({

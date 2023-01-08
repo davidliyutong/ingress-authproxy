@@ -5,6 +5,64 @@
         <v-tab>Info</v-tab>
         <v-tab>Security</v-tab>
         <v-tab-item key="1">
+          <v-container>
+            <v-card class="mx-auto my-4 pa-4">
+              <v-card-title class="text-h3">
+                {{  infoName  }}
+              </v-card-title>
+              <v-row class="mx-auto my-0">
+                <v-col>
+                  <b>Nickname</b>
+                </v-col>
+                <v-spacer>
+                </v-spacer>
+                <v-col>
+                  {{  infoNickname  }}
+                </v-col>
+              </v-row>
+              <v-row class="mx-auto my-0">
+                <v-col>
+                  <b>Email</b>
+                </v-col>
+                <v-spacer>
+                </v-spacer>
+                <v-col>
+                  {{  infoEmail  }}
+                </v-col>
+              </v-row>
+              <v-row class="mx-auto my-0">
+                <v-col>
+                  <b>Phone</b>
+                </v-col>
+                <v-spacer>
+                </v-spacer>
+                <v-col>
+                  {{  infoPhone  }}
+                </v-col>
+              </v-row>
+              <v-row class="mx-auto my-0">
+                <v-col>
+                  <b>Status</b>
+                </v-col>
+                <v-spacer>
+                </v-spacer>
+                <v-col>
+                  {{  infoStatus  }}
+                </v-col>
+              </v-row>
+              <v-row class="mx-auto my-0">
+                <v-col>
+                  <b>TotalPolicy</b>
+                </v-col>
+                <v-spacer>
+                </v-spacer>
+                <v-col>
+                  {{  infoTotalPolicy  }}
+                </v-col>
+              </v-row>
+            </v-card>
+          </v-container>
+
 
         </v-tab-item>
         <v-tab-item key="2">
@@ -79,7 +137,7 @@ async function updateUser(user) {
   if (user === null) {
     return false
   }
-  let targetURL = getRootPath() + "/v1/admin/users/" + user.name;
+  let targetURL = getRootPath() + "/v1/admin/users/" + user.metadata.name;
   let succeed = false;
   try {
     await axios.put(targetURL, JSON.stringify(user)
@@ -100,6 +158,12 @@ export default {
   data: () => ({
     password: "",
     confirm: "",
+    infoName: "",
+    infoNickname: "",
+    infoEmail: "",
+    infoPhone: "",
+    infoStatus: "",
+    infoTotalPolicy: "",
   }),
   methods: {
     resetForm: function () {
@@ -122,6 +186,17 @@ export default {
       } else {
         this.$message.bottom().error('Password Change Failed')
       }
+    },
+    async getInfo() {
+      let user = await getUser(localStorage.getItem('username'))
+      console.log(user)
+      this.infoName = user.metadata.name
+      this.infoNickname = user.nickname
+      this.infoPhone = user.phone
+      this.infoEmail = user.email
+      this.infoStatus = user.status
+      this.infoTotalPolicy = user.totalPolicy
+
     },
     setGlobalTitle: function () {
       var myElement = document.getElementById("global-title");
@@ -162,5 +237,8 @@ export default {
     confirm: 'validateField',
     password: 'validateField',
   },
+  created() {
+    this.getInfo()
+  }
 };
 </script>

@@ -1,6 +1,8 @@
 package ladon
 
 import (
+	policyRepo "ingress-authproxy/internal/apiserver/admin/policy/v1/repo"
+	userRepo "ingress-authproxy/internal/apiserver/admin/user/v1/repo"
 	repoInterface "ingress-authproxy/internal/apiserver/auth/v1/repo"
 	"sync"
 )
@@ -17,10 +19,10 @@ var (
 )
 
 // Repo creates and returns the store client instance.
-func Repo() (repoInterface.Repo, error) {
+func Repo(userRepoClient userRepo.UserRepo, policyRepoClient policyRepo.PolicyRepo) (repoInterface.Repo, error) {
 	once.Do(func() {
 		r = repo{
-			authzRepo: newUserRepo(),
+			authzRepo: newAuthzRepo(userRepoClient, policyRepoClient),
 		}
 	})
 

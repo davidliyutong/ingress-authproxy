@@ -75,12 +75,12 @@ func (u *userService) List() (*model.UserList, error) {
 				CreatedAt: user.CreatedAt,
 				UpdatedAt: user.UpdatedAt,
 			},
-			Name:     user.Name,
-			Nickname: user.Nickname,
-			Email:    user.Email,
-			Phone:    user.Phone,
-			IsAdmin:  user.IsAdmin,
-			Status:   user.Status,
+			Nickname:  user.Nickname,
+			Email:     user.Email,
+			Phone:     user.Phone,
+			IsAdmin:   user.IsAdmin,
+			Status:    user.Status,
+			LoginedAt: user.LoginedAt,
 		})
 	}
 

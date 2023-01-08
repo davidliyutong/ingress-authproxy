@@ -11,7 +11,6 @@ import (
 // User represents a user restful resource. It is also used as data model.
 type User struct {
 	metamodel.ObjectMeta `json:"metadata,omitempty"`
-	Name                 string    `json:"name" gorm:"uniqueIndex;not null"`
 	Status               int64     `json:"status"              gorm:"column:status"    validate:"omitempty"`
 	Nickname             string    `json:"nickname"            gorm:"column:nickname"  validate:"required,min=1,max=30"`
 	Password             string    `json:"password,omitempty"  gorm:"column:password"  validate:"required"`

@@ -35,18 +35,35 @@ axios.interceptors.request.use(config => {
     });
 
 axios.interceptors.response.use(response => {
-        console.log('response：'+response.data.code)
-        if (response.data.code === 401) {
-            localStorage.removeItem('username');
-            localStorage.removeItem('token');
-            router.push('/');
-        } else {
-            return response
-        }
         return response
-    },
-    error => {
-        return Promise.reject(error);
+    }, async error => {
+        console.log(error)
+        let { response } = error
+        let error_msg = ''
+        if (response) {
+            switch (response.status) {
+                case 401:
+                    error_msg = 'Unauthorized'
+                    localStorage.removeItem('username')
+                    localStorage.removeItem('token')
+                    router.push('/');
+                    break
+                default:
+                    break
+            }
+            if(error.includes("timeout")) {
+                error_msg = 'Request Timeout'
+            }
+        } else {
+            //服务器连结果都没有返回
+            error_msg = "Server Not Responding"
+            this.$message.bottom().error()
+        }
+        if (error_msg !== '') {
+            this.$message.bottom().error()
+        }
+        return Promise.reject(error_msg)
+
     })
 
 // axios.defaults.headers.common['Authorization'] = "Bearer " + localStorage.getItem('token');

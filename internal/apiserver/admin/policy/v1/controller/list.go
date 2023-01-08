@@ -10,7 +10,7 @@ import (
 func (c2 *controller) List(c *gin.Context) {
 	log.Infoln("[GINServer] policyController: List")
 
-	policies, err := c2.srv.NewPolicyService().List(c.GetString(UsernameKey))
+	policies, err := c2.srv.NewPolicyService().List()
 	if err != nil {
 		utils.WriteResponse(c, http.StatusInternalServerError, err, nil)
 

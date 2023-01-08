@@ -1,10 +1,13 @@
 package server
 
 import (
+	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	userRepo "ingress-authproxy/internal/apiserver/admin/user/v1/repo"
 	"ingress-authproxy/internal/config"
 	"os"
+	"time"
 )
 
 type authProxyAdmin struct {
@@ -50,4 +53,54 @@ func NewAuthProxyAdmin(cmd *cobra.Command, args []string) AuthProxyAdmin {
 		cmd:  cmd,
 		args: args,
 	}
+}
+
+func adminAuth(username string, password string) bool {
+	user, err := userRepo.Client().UserRepo().Get(username)
+	if err != nil {
+		return false
+	}
+
+	if err := user.Compare(password); err != nil {
+		return false
+	}
+
+	log.Debugln("user:", user.Name, "is admin:", user.IsAdmin)
+	if !(user.IsAdmin == 1) {
+		return false
+	}
+
+	user.LoginedAt = time.Now()
+	_ = userRepo.Client().UserRepo().Update(user)
+
+	return true
+}
+
+func adminAuthz(username string, c *gin.Context) bool {
+	return true
+}
+
+func userAuth(username string, password string) bool {
+	user, err := userRepo.Client().UserRepo().Get(username)
+	if err != nil {
+		return false
+	}
+
+	if err := user.Compare(password); err != nil {
+		return false
+	}
+
+	log.Debugln("user:", user.Name, "is admin:", user.IsAdmin)
+	if !(user.IsAdmin == 1) {
+		return false
+	}
+
+	user.LoginedAt = time.Now()
+	_ = userRepo.Client().UserRepo().Update(user)
+
+	return true
+}
+
+func userAuthz(username string, c *gin.Context) bool {
+	return true
 }

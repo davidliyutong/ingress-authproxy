@@ -11,13 +11,13 @@ import (
 func (c2 *controller) Delete(c *gin.Context) {
 	log.Infoln("[GINServer] policyController: delete")
 
-	s := c.GetString(UsernameKey)
+	s := c.Param("name")
 	if s == "" {
 		utils.WriteResponse(c, http.StatusBadRequest, errors.New("empty username"), nil)
 		return
 	}
 
-	if err := c2.srv.NewPolicyService().Delete(s, c.Param("name")); err != nil {
+	if err := c2.srv.NewPolicyService().Delete(s); err != nil {
 		utils.WriteResponse(c, http.StatusInternalServerError, err, nil)
 
 		return

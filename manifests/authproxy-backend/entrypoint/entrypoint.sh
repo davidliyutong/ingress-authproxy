@@ -6,4 +6,9 @@ if [ ! -f $CONFIG_DIR/config.yaml ]; then
     cat "$CONFIG_DIR/config.yaml"
 fi
 
-./authproxy serve --config "$CONFIG_DIR/config.yaml"
+while true; do
+    ./authproxy serve --config "$CONFIG_DIR/config.yaml"
+    echo "authproxy exited with code $?, restarting in 5 seconds, press ctrl+c to exit"
+    sleep 5
+done
+

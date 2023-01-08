@@ -19,6 +19,7 @@ image.push.%:
 	$(eval IMAGE := $*)
 	@echo "===========> Pushing docker image $(IMAGE) $(VERSION)"
 	@docker push "$(AUTHOR)/$(_BINARY_PREFIX)$(IMAGE):$(VERSION)-$(GOOS)-$(GOARCH)"
+	@docker push "$(AUTHOR)/$(_BINARY_PREFIX)$(IMAGE):latest"
 
 .PHONY: image.push
 image.push: $(foreach image,${IMAGES},image.push.${image})

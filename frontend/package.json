@@ -26,6 +26,7 @@
     "vue": "^2.6.11",
     "vue-apexcharts": "^1.6.2",
     "vue-leaflet-minimap": "^1.0.8",
+    "vue-paragraph": "^0.2.4",
     "vue-router": "^3.5.3",
     "vue2-leaflet": "^2.7.1",
     "vuetify": "^2.6.1",

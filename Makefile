@@ -25,3 +25,12 @@ clean: demo.clean
 .PHONY: build
 build:
 	@$(MAKE) go.build
+
+
+.PHONY: demo
+demo:
+	@cd manifests/authproxy && docker-compose up
+
+.PHONY: demo.stop
+demo.stop:
+	@cd manifests/authproxy && docker-compose down

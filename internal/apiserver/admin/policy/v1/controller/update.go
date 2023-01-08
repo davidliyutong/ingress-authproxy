@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	model "ingress-authproxy/internal/apiserver/admin/policy/v1/model"
@@ -18,10 +19,13 @@ func (c2 *controller) Update(c *gin.Context) {
 		return
 	}
 
-	username := c.GetString(UsernameKey)
 	policyName := c.Param("name")
+	if policyName == "" {
+		utils.WriteResponse(c, http.StatusBadRequest, errors.New("empty username"), nil)
+		return
+	}
 
-	policy, err := c2.srv.NewPolicyService().Get(username, policyName)
+	policy, err := c2.srv.NewPolicyService().Get(policyName)
 	if err != nil {
 		utils.WriteResponse(c, http.StatusInternalServerError, err, nil)
 		return

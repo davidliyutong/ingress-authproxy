@@ -12,6 +12,9 @@ import (
 	userCtl "ingress-authproxy/internal/apiserver/admin/user/v1/controller"
 	userRepo "ingress-authproxy/internal/apiserver/admin/user/v1/repo"
 	userRepoMysql "ingress-authproxy/internal/apiserver/admin/user/v1/repo/mysql"
+	authCtl "ingress-authproxy/internal/apiserver/auth/v1/controller"
+	authRepo "ingress-authproxy/internal/apiserver/auth/v1/repo"
+	authRepoLadon "ingress-authproxy/internal/apiserver/auth/v1/repo/ladon"
 	"ingress-authproxy/internal/config"
 	"ingress-authproxy/internal/utils"
 	auth "ingress-authproxy/pkg/auth/v1"
@@ -37,6 +40,14 @@ func installMiscAPIs(router *gin.Engine) {
 	})
 
 	router.GET("/version", func(c *gin.Context) {
+		c.String(http.StatusOK, version.GitVersion)
+	})
+
+	router.GET(filepath.Join(AuthProxyLayout.V1.Self, "/healthz"), func(c *gin.Context) {
+		c.String(http.StatusOK, "OK")
+	})
+
+	router.GET(filepath.Join(AuthProxyLayout.V1.Self, "/version"), func(c *gin.Context) {
 		c.String(http.StatusOK, version.GitVersion)
 	})
 
@@ -86,6 +97,34 @@ func installV1Group(router *gin.Engine, jwt *jwt.GinJWTMiddleware) {
 			policyGrp.GET("", policyController.List)
 		}
 
+		if config.GlobalServerDesc.Opt.Debug {
+			adminGrp.GET("server/option", func(c *gin.Context) {
+				c.JSON(http.StatusOK, config.GlobalServerDesc.Opt)
+			})
+		} else {
+			adminGrp.GET("server/option", func(c *gin.Context) {
+				c.JSON(http.StatusForbidden, gin.H{"code": http.StatusForbidden, "message": "config disabled in non-debug mode"})
+			})
+		}
+		adminGrp.POST("server/shutdown", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"message": "server shutdown"})
+			c.Done()
+			go func() {
+				time.Sleep(time.Second * 3)
+				os.Exit(0)
+			}()
+		})
+	}
+
+	ingressAuthPath, _ := filepath.Rel(AuthProxyLayout.V1.Self, AuthProxyLayout.V1.IngressAuth.Self)
+	ingressAuthGrp := v1API.Group(ingressAuthPath)
+	{
+		authRepoClient, _ := authRepoLadon.Repo(userRepo.Client().UserRepo(), policyRepo.Client().PolicyRepo())
+		authRepo.SetClient(authRepoClient)
+
+		authController := authCtl.NewController(authRepoClient)
+
+		ingressAuthGrp.GET(":resource", authController.BasicAuthz)
 	}
 }
 
@@ -97,29 +136,8 @@ func installJWTGroup(router *gin.Engine) (*jwt.GinJWTMiddleware, error) {
 		AuthProxyLayout.V1.JWT.Login,
 		AuthProxyLayout.V1.JWT.Refresh,
 		time.Second*2*3600,
-		func(username string, password string) bool {
-			user, err := userRepo.Client().UserRepo().Get(username)
-			if err != nil {
-				return false
-			}
-
-			if err := user.Compare(password); err != nil {
-				return false
-			}
-
-			log.Debugln("user:", user.Name, "is admin:", user.IsAdmin)
-			if !(user.IsAdmin == 1) {
-				return false
-			}
-
-			user.LoginedAt = time.Now()
-			_ = userRepo.Client().UserRepo().Update(user)
-
-			return true
-		},
-		func(username string) bool {
-			return true
-		},
+		adminAuth,
+		adminAuthz,
 		config.GlobalServerDesc.Opt.JWT.Secret,
 		config.GlobalServerDesc.Opt.Network.Domain)
 	return ginJWT, nil
@@ -131,6 +149,7 @@ func installGinServer() *gin.Engine {
 	ginJWT, _ := installJWTGroup(router)
 	installPingGroup(router)
 	installV1Group(router, ginJWT)
+	installMiscAPIs(router)
 	return router
 }
 

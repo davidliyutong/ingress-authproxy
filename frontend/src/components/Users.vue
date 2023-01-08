@@ -54,7 +54,7 @@
       <v-card-actions>
         <v-btn :disabled="step === 1" text @click="step--"> {{ userCreationLeftButtonText }}</v-btn>
         <v-spacer></v-spacer>
-        <v-btn :disabled="step === 5" color="primary" depressed @click=createUserRightButton()> {{
+        <v-btn color="primary" depressed @click=createUserRightButton()> {{
             userCreationRightButtonText
           }}
         </v-btn>
@@ -88,7 +88,7 @@
         :headers="headers"
         :items="userItems"
         sort-by="calories"
-        :items-per-page="20"
+        :items-per-page=20
         class="elevation-1"
         no-data-text="No Users"
         show-select
@@ -103,6 +103,7 @@
               vertical
           ></v-divider>
           <v-spacer></v-spacer>
+          <v-btn color="primary" @click="initialize">Refresh</v-btn>
           <v-dialog v-model="dialog" max-width="500px">
             <!--            <template v-slot:activator="{ on, attrs }">-->
             <!--              <v-btn-->
@@ -160,7 +161,7 @@
         </v-icon>
       </template>
       <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize">Reset</v-btn>
+        <v-btn color="primary" @click="initialize">Refresh</v-btn>
       </template>
     </v-data-table>
   </div>
@@ -175,7 +176,7 @@ function getRootPath() {
 
 async function createUser(user) {
   if (user.nickname === "") {
-    user.nickname = user.name
+    user.nickname = user.metadata.name
   }
   if (user.password !== user.confirm) {
     return false
@@ -204,7 +205,7 @@ async function updateUser(user) {
   if (user === null) {
     return false
   }
-  let targetURL = getRootPath() + "/v1/admin/users/" + user.name;
+  let targetURL = getRootPath() + "/v1/admin/users/" + user.metadata.name;
   let succeed = false;
   try {
     user.status = Number(user.status)
@@ -264,7 +265,7 @@ export default {
       {
         text: 'name',
         align: 'start',
-        value: 'name',
+        value: 'metadata.name',
       },
       {text: 'nickname',value: 'nickname',},
       {text: 'Phone', value: 'phone'},
@@ -303,17 +304,15 @@ export default {
       try {
         axios.get(targetURL,
         ).then(response => {
-          console.log(JSON.stringify(response.data.items))
+          // console.log(JSON.stringify(response.data.items, null, 4))
           if (response.status === 200) {
-            for (let i = 0; i < response.data.items.length; i++) {
-              this.userItems.push(response.data.items[i])
-            }
+            this.userItems = response.data.items
           } else {
-            this.userItems.push(null)
+            this.userItems = []
           }
         })
       } catch (err) {
-        this.userItems.push(null)
+        this.userItems = []
       }
     },
     editItem(item) {
@@ -325,14 +324,16 @@ export default {
 
     async deleteItem(item) {
       const index = this.userItems.indexOf(item)
-      confirm('Are you sure you want to delete this item?')
-      let succeed = await deleteUser(this.userItems[index].name)
-      if (succeed) {
-        this.$message.bottom().success("User Deleted")
-        this.userItems.splice(index, 1)
-      } else {
-        this.$message.bottom().success("Failed to Delete User")
+      let ret = confirm('Are you sure you want to delete this item?')
+      if (ret === true) {
+        let succeed = await deleteUser(this.userItems[index].name)
+        if (succeed) {
+          this.$message.bottom().success("User Deleted")
+          this.userItems.splice(index, 1)
+        } else {
+          this.$message.bottom().success("Failed to Delete User")
 
+        }
       }
     },
 
@@ -367,7 +368,7 @@ export default {
       if (this.step <= 3) {
         this.step++
         return null
-      } else {
+      } else if (this.step === 4) {
         let user = {
           nickname: this.nickname,
           password: this.password,
@@ -375,7 +376,9 @@ export default {
           email: this.email,
           phone: this.phone,
           isAdmin: this.isAdmin,
-          name: this.username,
+          meta: {
+            name: this.username
+          },
         }
         let succeed = await createUser(user)
         if (succeed) {
@@ -383,6 +386,8 @@ export default {
         } else {
           this.$message.bottom().error("Failed to Create User")
         }
+      } else {
+         this.step = 1
       }
     }
   },
@@ -407,6 +412,8 @@ export default {
         return "Create"
       } else if (this.step === 4) {
         return "Confirm"
+      } else if (this.step === 5) {
+        return "New"
       } else {
         return "Next"
       }

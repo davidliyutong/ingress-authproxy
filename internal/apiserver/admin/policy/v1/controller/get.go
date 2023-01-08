@@ -11,13 +11,13 @@ import (
 func (c2 *controller) Get(c *gin.Context) {
 	log.Infoln("[GINServer] policyController: get")
 
-	s := c.GetString(UsernameKey)
+	s := c.Param("name")
 	if s == "" {
 		utils.WriteResponse(c, http.StatusBadRequest, errors.New("empty username"), nil)
 		return
 	}
 
-	policy, err := c2.srv.NewPolicyService().Get(s, c.Param("name"))
+	policy, err := c2.srv.NewPolicyService().Get(s)
 	if err != nil {
 		utils.WriteResponse(c, http.StatusInternalServerError, err, nil)
 
