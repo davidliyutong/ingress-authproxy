@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-const pathLoggedOut = "/logged-out"
+const pathLoggedOut = "/oidc/logged-out"
 
 // newOP will create an OpenID Provider for localhost on a specified port with a given encryption key
 // and a predefined default logout uri
@@ -46,7 +46,7 @@ func newOP(ctx context.Context, storage op.Storage, issuer string, key [32]byte)
 	}
 	handler, err := op.NewOpenIDProvider(ctx, config, storage,
 		// as an example on how to customize an endpoint this will change the authorization_endpoint from /authorize to /auth
-		op.WithCustomAuthEndpoint(op.NewEndpoint("auth")),
+		op.WithCustomAuthEndpoint(op.NewEndpoint("/auth")),
 	)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func setupLoginServer(storage *storage.Storage, provider op.OpenIDProvider) *mux
 
 	// regardless of how many pages / steps there are in the process, the UI must be registered in the router,
 	// so we will direct all calls to /login to the login UI
-	router.PathPrefix("/login/").Handler(http.StripPrefix("/login", l.Router))
+	router.PathPrefix("/oidc/login/").Handler(http.StripPrefix("/oidc/login", l.Router))
 
 	// we register the http handler of the OP on the root, so that the discovery endpoint (/.well-known/openid-configuration)
 	// is served on the correct path
@@ -83,6 +83,7 @@ func setupLoginServer(storage *storage.Storage, provider op.OpenIDProvider) *mux
 	// if your issuer ends with a path (e.g. http://localhost:9998/custom/path/),
 	// then you would have to set the path prefix (/custom/path/)
 	router.PathPrefix("/").Handler(provider.HttpHandler())
+	router.PathPrefix("/oidc/").Handler(provider.HttpHandler())
 
 	return router
 }
@@ -114,7 +115,7 @@ func main() {
 	repo := storage.NewStorage(storage.NewUserStore())
 	port := "9998"
 
-	provider := setupOIDCServer(ctx, "http://localhost:"+port, repo, "encryptionKey")
+	provider := setupOIDCServer(ctx, "http://localhost:"+port+"/oidc", repo, "encryptionKey")
 	router := setupLoginServer(repo, provider)
 
 	server := &http.Server{

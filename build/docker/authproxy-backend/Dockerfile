@@ -6,7 +6,7 @@ COPY . .
 ENV GOPROXY https://goproxy.cn
 
 
-RUN go mod vendor && go build -o authproxy ./cmd/authproxy/app.go
+RUN go mod vendor && go build -ldflags "-X ingress-authproxy/pkg/version.GitVersion=$(git describe --tags --always --dirty)" -o authproxy ./cmd/authproxy/app.go
 
 FROM ubuntu:20.04
 

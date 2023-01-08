@@ -59,7 +59,7 @@ spec:
               protocol: TCP
           env:
             - name: AUTHPROXY_BACKEND_URL # need to match the backend
-              value: "http://localhost:50032" # specify http/https
+              value: "http://127.0.0.1:50032" # specify http/https, user 127.0.0.1 instead of localhost
           resources:
             requests:
               memory: "64Mi"
