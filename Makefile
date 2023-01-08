@@ -22,7 +22,9 @@ clean:
 	@echo "===========> Cleaning all build output"
 	@-rm -vrf $(OUTPUT_DIR)
 
-
+.PHONY: build
+build:
+	@$(MAKE) go.build
 
 .PHONY: demo demo.start
 demo:
