@@ -4,6 +4,7 @@ import (
 	model "ingress-authproxy/internal/apiserver/admin/policy/v1/model"
 	"ingress-authproxy/internal/apiserver/admin/policy/v1/repo"
 	authRepo "ingress-authproxy/internal/apiserver/auth/v1/repo"
+	"ingress-authproxy/internal/utils"
 )
 
 type PolicyService interface {
@@ -19,6 +20,9 @@ type policyService struct {
 }
 
 func (p *policyService) Create(policy *model.Policy) error {
+	if policy.AuthzPolicy.DefaultPolicy.ID == "" {
+		policy.AuthzPolicy.DefaultPolicy.ID = utils.MustGenerateUUID()
+	}
 	err := p.repo.PolicyRepo().Create(policy)
 	if err == nil {
 		authRepo.Client().AuthzRepo().Trigger()

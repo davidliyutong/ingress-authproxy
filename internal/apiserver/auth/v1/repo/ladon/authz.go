@@ -3,6 +3,7 @@ package ladon
 import (
 	"context"
 	"github.com/ory/ladon"
+	"github.com/ory/ladon/manager/memory"
 	log "github.com/sirupsen/logrus"
 	policyRepo "ingress-authproxy/internal/apiserver/admin/policy/v1/repo"
 	userRepo "ingress-authproxy/internal/apiserver/admin/user/v1/repo"
@@ -15,6 +16,7 @@ type authzRepo struct {
 	userRepoClient   userRepo.UserRepo
 	policyRepoClient policyRepo.PolicyRepo
 	policiesCache    []*ladon.DefaultPolicy
+	warden           *ladon.Ladon
 	mutex            *sync.RWMutex
 
 	channel   chan int
@@ -42,6 +44,7 @@ type AuthzRepo interface {
 	Start()
 	Stop()
 	Trigger()
+	Validate(request *ladon.Request) error
 	UserRepo() userRepo.UserRepo
 	PolicyRepo() policyRepo.PolicyRepo
 }
@@ -53,6 +56,21 @@ var (
 	onceCache    sync.Once
 )
 
+func (a *authzRepo) resetPolicies(policies []*ladon.DefaultPolicy) {
+
+	newManager := memory.NewMemoryManager()
+	for _, policy := range policies {
+		_ = newManager.Create(policy)
+	}
+
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+	a.policiesCache = policies
+	a.warden.Manager = newManager
+	log.Debugf("[Authorizer] updated cache, got %d policies", len(repoInstance.policiesCache))
+
+}
+
 func (a *authzRepo) update() {
 
 	policyList, _ := a.policyRepoClient.List()
@@ -61,10 +79,7 @@ func (a *authzRepo) update() {
 		newCache = append(newCache, &v.AuthzPolicy.DefaultPolicy)
 	}
 
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
-	a.policiesCache = newCache
-	log.Debugf("[Authorizer] updated cache, got %d policies", len(repoInstance.policiesCache))
+	a.resetPolicies(newCache)
 	a.Done()
 }
 
@@ -112,12 +127,21 @@ func (a *authzRepo) Wait() {
 	a.taskGroup.Wait()
 }
 
+func (a *authzRepo) Validate(request *ladon.Request) error {
+	err := a.warden.IsAllowed(request)
+	return err
+}
+
 // newAuthzRepo creates and returns a user storage.
 func newAuthzRepo(userRepoClient userRepo.UserRepo, policyRepoClient policyRepo.PolicyRepo) repoInterface.AuthzRepo {
 	onceCache.Do(func() {
 		repoInstance = &authzRepo{
 			userRepoClient:   userRepoClient,
 			policyRepoClient: policyRepoClient,
+			warden: &ladon.Ladon{
+				Manager:     memory.NewMemoryManager(),
+				AuditLogger: &ladon.AuditLoggerInfo{},
+			},
 
 			policiesCache: make([]*ladon.DefaultPolicy, 0),
 			mutex:         &sync.RWMutex{},

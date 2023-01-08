@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/ory/ladon"
 	"ingress-authproxy/internal/apiserver/auth/v1/repo"
 	"time"
 )
@@ -33,7 +34,12 @@ func (a authzService) Authenticate(username string, password string, resource st
 		_ = a.repo.AuthzRepo().UserRepo().Update(user)
 	}()
 
-	_, err = a.repo.AuthzRepo().PolicyRepo().Get(resource)
+	authRequest := ladon.Request{
+		Subject:  username,
+		Action:   "get",
+		Resource: "resources:" + resource,
+	}
+	err = a.repo.AuthzRepo().Validate(&authRequest)
 	if err != nil {
 		return false
 	}

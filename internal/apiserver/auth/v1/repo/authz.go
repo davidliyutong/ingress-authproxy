@@ -11,6 +11,7 @@ type AuthzRepo interface {
 	Start()
 	Stop()
 	Trigger()
+	Validate(request *ladon.Request) error
 	UserRepo() userRepo.UserRepo
 	PolicyRepo() policyRepo.PolicyRepo
 }

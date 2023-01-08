@@ -232,6 +232,7 @@ github.com/novalagung/gubrak v1.0.0/go.mod h1:lahTbjdK/OLI9Y4alRlf003XEwbiOj7ERk
 github.com/onsi/gomega v1.20.1 h1:PA/3qinGoukvymdIDV8pii6tiZgC8kbmJO6Z5+b002Q=
 github.com/ory/ladon v1.2.0 h1:efIVtNkObNR/HL7nR5y17Lrw9c/wMwe56iKVDcRv3GY=
 github.com/ory/ladon v1.2.0/go.mod h1:25bNc/Glx/8xCH7MbItDxjvviAmFQ+aYxb1V1SE5wlg=
+github.com/ory/pagination v0.0.1 h1:Zp+0n/UXSGYlJAMN0BuRjZhULsQRebGHfqByKtZXNYI=
 github.com/ory/pagination v0.0.1/go.mod h1:d1ToRROAUleriPhmb2dYbhANhhLwZ8s395m2yJCDFh8=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
