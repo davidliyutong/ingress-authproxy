@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: apps.ingress-authproxy
+  name: ingress-authproxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: apps.ingress-authproxy
+  template:
+    metadata:
+      labels:
+        k8s-app: apps.ingress-authproxy
+    spec:
+      volumes:
+        - name: ingress-authproxy-database
+          persistentVolumeClaim:
+            claimName: ingress-authproxy-database
+      containers:
+        - name: container-0
+          image: docker.io/davidliyutong/ingress-authproxy-backend:latest # choose a version
+          imagePullPolicy: Always
+          ports:
+            - name: 50032tcp
+              containerPort: 50032
+              protocol: TCP
+          env:
+            - name: AUTHPROXY_MYSQL_DATABASE # need to match the database name
+              value: "authproxy"
+            - name: AUTHPROXY_MYSQL_USERNAME # need to match the username in the database
+              value: "authproxy"
+            - name: AUTHPROXY_MYSQL_PASSWORD # need to match the password in the database
+              value: "authproxy"
+            - name: AUTHPROXY_MYSQL_HOSTNAME # can use other database
+              value: "localhost"
+            - name: AUTHPROXY_MYSQL_PORT # can use other ports
+              value: "3306"
+            - name: AUTHPROXY_DEBUG
+              value: "1" # "1" for debugging
+            - name: AUTHPROXY_INIT_USERNAME
+              value: "admin"
+            - name: AUTHPROXY_INIT_PASSWORD
+              value: "admin"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+        - name: container-1
+          image: docker.io/davidliyutong/ingress-authproxy-frontend:latest # choose a version
+          imagePullPolicy: Always
+          ports:
+            - name: 80tcp
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: AUTHPROXY_BACKEND_URL # need to match the backend
+              value: "http://localhost:50032" # specify http/https
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+        - name: container-2 # delete this section if using external database
+          image: docker.io/mysql:8.0.31
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: ingress-authproxy-database
+              mountPath: /var/lib/mysql
+          ports:
+            - name: 3306tcp
+              containerPort: 3306
+              protocol: TCP
+          env:
+            - name: MYSQL_ROOT_HOST # TODO: this is a security risk
+              value: "%"
+            - name: MYSQL_USER
+              value: "authproxy"
+            - name: MYSQL_PASSWORD
+              value: "authproxy"
+            - name: MYSQL_DATABASE
+              value: "authproxy"
+            - name: MYSQL_ROOT_PASSWORD
+              value: "some_super_secret_password"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: ingress-authproxy
+spec:
+  type: ClusterIP
+  selector:
+    k8s-app: apps.ingress-authproxy
+  ports:
+    - name: https
+      port: 80
+      protocol: TCP
+      targetPort: 80
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ingress-authproxy-database
+spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi

@@ -17,8 +17,7 @@
         <v-window-item :value="2">
           <v-card-text>
             <v-text-field v-model="password" label="Password" placeholder="password" type="password"></v-text-field>
-            <v-text-field v-model="confirm" label="Confirm Password" placeholder="confirm"
-                          type="confirm"></v-text-field>
+            <v-text-field v-model="confirm" label="Confirm Password" placeholder="confirm" type="password"></v-text-field>
             <span class="text-caption grey--text text--darken-1"> Please enter a password for your account </span>
           </v-card-text>
         </v-window-item>
@@ -383,7 +382,7 @@ export default {
           email: this.email,
           phone: this.phone,
           isAdmin: this.isAdmin,
-          meta: {
+          metadata: {
             name: this.username
           },
         }
