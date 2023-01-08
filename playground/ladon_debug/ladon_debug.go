@@ -29,7 +29,7 @@ func main() {
 				Manager:     memory.NewMemoryManager(),
 				AuditLogger: &ladon.AuditLoggerInfo{},
 			}
-			warden.Manager.Create(policy)
+			_ = warden.Manager.Create(policy)
 			if err := warden.IsAllowed(accessRequest); err != nil {
 				message = "无操作权限"
 			} else {
@@ -40,5 +40,5 @@ func main() {
 		}
 	})
 
-	r.Run(":8080")
+	_ = r.Run(":8080")
 }

@@ -98,6 +98,6 @@ func userAuth(username string, password string) bool {
 	return true
 }
 
-func userAuthz(u string, c *gin.Context) bool {
-	return true
-}
+//func userAuthz(u string, c *gin.Context) bool {
+//	return true
+//}

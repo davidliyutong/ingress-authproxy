@@ -32,7 +32,7 @@ type Policy struct {
 // PolicyList is the whole list of all policies which have been stored in storage.
 type PolicyList struct {
 	// May add TypeMeta in the future.
-	// metav1.TypeMeta `json:",inline"`
+	// meta.v1.TypeMeta `json:",inline"`
 
 	// Standard list metadata.
 	metamodel.ListMeta `json:",inline"`

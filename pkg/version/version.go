@@ -1,5 +1,5 @@
 // Package version supplies version information collected at build time to
-// apimachinery components.
+// api machinery components.
 package version
 
 import (

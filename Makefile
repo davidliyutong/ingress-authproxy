@@ -18,13 +18,10 @@ export USAGE_OPTIONS
 
 
 .PHONY: clean
-clean: demo.clean
+clean:
 	@echo "===========> Cleaning all build output"
 	@-rm -vrf $(OUTPUT_DIR)
 
-.PHONY: build
-build:
-	@$(MAKE) go.build
 
 
 .PHONY: demo

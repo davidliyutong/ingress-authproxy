@@ -109,8 +109,8 @@ func newUserRepo(opt *config.MySQLOpt) repoInterface.UserRepo {
 	return &userRepo{dbEngine: db}
 }
 
-func (p *userRepo) close() error {
-	dbEngine, err := p.dbEngine.DB()
+func (u *userRepo) close() error {
+	dbEngine, err := u.dbEngine.DB()
 	if err != nil {
 		return err
 	}

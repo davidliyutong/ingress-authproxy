@@ -20,7 +20,6 @@ import (
 	"ingress-authproxy/internal/config"
 	"ingress-authproxy/internal/utils"
 	auth "ingress-authproxy/pkg/auth/v1"
-	ping "ingress-authproxy/pkg/ping/v1"
 	"ingress-authproxy/pkg/version"
 	"net/http"
 	"os"
@@ -28,12 +27,6 @@ import (
 	"strconv"
 	"time"
 )
-
-func installPingGroup(router *gin.Engine) {
-	grp := router.Group(AuthProxyLayout.Ping)
-	controller := ping.NewController(nil)
-	grp.GET("", controller.Info)
-}
 
 // InstallAPIs install generic apis.
 func installMiscAPIs(router *gin.Engine) {
@@ -164,7 +157,6 @@ func installGinServer() *gin.Engine {
 		AuthProxyLayout.V1.JWT.Login,
 		AuthProxyLayout.V1.JWT.Refresh, adminJWT)
 
-	installPingGroup(router)
 	v1API := installV1Group(router)
 	installAdminGroup(v1API, adminJWT)
 	installAuthGroup(v1API)

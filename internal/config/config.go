@@ -143,7 +143,7 @@ func (o *AuthProxyDesc) Parse(cmd *cobra.Command) error {
 	vipCfg.SetDefault("mysql.username", "authproxy")
 	vipCfg.SetDefault("mysql.password", "authproxy")
 	vipCfg.SetDefault("jwt.expired", DefaultTimeoutSecond*time.Second)
-	vipCfg.SetDefault("init.username", DefaultInitPassword)
+	vipCfg.SetDefault("init.username", DefaultInitUsername)
 	vipCfg.SetDefault("init.password", DefaultInitPassword)
 
 	if configFileCmd, err := cmd.Flags().GetString("config"); err == nil && configFileCmd != "" {

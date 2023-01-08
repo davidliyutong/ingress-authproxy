@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-const AccessKeyRef = "accessKey"
-const SecretKeyRef = "secretKey"
+//const AccessKeyRef = "accessKey"
+//const SecretKeyRef = "secretKey"
 
 type JWTLoginCredential struct {
 	AccessKey string `form:"accessKey" json:"accessKey" binding:"required"`
@@ -21,7 +21,8 @@ type JWTResponse struct {
 }
 
 const IdentityKeyStr = "uid"
-const IsAdminStr = "is_admin"
+
+//const IsAdminStr = "is_admin"
 
 type JWTStrategy struct {
 	ginjwt.GinJWTMiddleware
