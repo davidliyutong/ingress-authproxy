@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -20,9 +19,8 @@ func (b BasicAuthStrategy) AuthFunc() gin.HandlerFunc {
 		auth := strings.SplitN(c.Request.Header.Get("Authorization"), " ", 2)
 
 		if len(auth) != 2 || auth[0] != "Basic" {
-			//c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("not basic auth")})
-			c.Header("WWW-Authenticate", "Basic realm="+strconv.Quote("Authorization Required"))
-			c.AbortWithStatus(http.StatusUnauthorized)
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("not basic auth")})
+			c.Abort()
 			return
 		}
 
@@ -30,8 +28,8 @@ func (b BasicAuthStrategy) AuthFunc() gin.HandlerFunc {
 		pair := strings.SplitN(string(payload), ":", 2)
 
 		if len(pair) != 2 || !b.compare(pair[0], pair[1]) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("username or password not matched")})
-			c.AbortWithStatus(http.StatusUnauthorized)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": fmt.Errorf("username or password not matched")})
+			c.Abort()
 			return
 		}
 

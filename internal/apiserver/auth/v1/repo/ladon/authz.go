@@ -96,6 +96,7 @@ func (a *authzRepo) Start() {
 			default:
 				_, ok := <-a.channel
 				if ok {
+					time.Sleep(time.Second * 1) // Delay to avoid multiple updates
 					go a.update()
 				}
 			}
@@ -150,10 +151,13 @@ func newAuthzRepo(userRepoClient userRepo.UserRepo, policyRepoClient policyRepo.
 			taskGroup: &sync.WaitGroup{},
 		}
 		log.Infoln("[Authorizer] updating cache")
-		repoInstance.Start()
-		repoInstance.Trigger()
-		repoInstance.Wait()
-		log.Infof("[Authorizer] updated cache, got %d policies", len(repoInstance.policiesCache))
+		go func() {
+			time.Sleep(1 * time.Second)
+			repoInstance.Start()
+			repoInstance.Trigger()
+			repoInstance.Wait()
+			log.Infof("[Authorizer] updated cache, got %d policies", len(repoInstance.policiesCache))
+		}()
 
 	})
 	return repoInstance

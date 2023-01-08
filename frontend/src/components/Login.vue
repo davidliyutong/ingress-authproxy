@@ -66,6 +66,24 @@
               </v-card-text>
             </v-card>
 
+            <v-card
+                class="mx-auto my-8 elevation-12"
+                link to="/passwordreset"
+                color="success"
+            >
+              <v-container>
+                <v-row>
+                  <v-card-title class="mx-4">
+                    <div class="white--text">
+                      Self Managed Password Reset
+                    </div>
+                  </v-card-title>
+                  <v-spacer></v-spacer>
+                  <v-icon color="white" class="mx-4">mdi-arrow-right</v-icon>
+                </v-row>
+              </v-container>
+            </v-card>
+
           </v-flex>
         </v-layout>
       </v-container>
@@ -78,7 +96,7 @@
 import qs from 'qs'
 import axios from 'axios'
 
-async function getToken (username, password) {
+async function getToken(username, password) {
   let params = {
     accessKey: username,
     secretKey: password
@@ -97,7 +115,7 @@ async function getToken (username, password) {
         loginSucceed = true
       }
     })
-  } catch(err) {
+  } catch (err) {
     loginSucceed = false
   }
 
@@ -120,11 +138,11 @@ export default {
       this.$refs.form.reset()
     },
     login: async function () {
-      let loginSucceed = await getToken(this.username,this.password)
+      let loginSucceed = await getToken(this.username, this.password)
 
       // console.log(loginSucceed)
       if (loginSucceed !== true) {
-          this.snackbarFail = true
+        this.snackbarFail = true
       } else {
         this.snackbarOK = true
         await this.$router.push('/admin')

@@ -9,9 +9,11 @@ import (
 	policyCtl "ingress-authproxy/internal/apiserver/admin/policy/v1/controller"
 	policyRepo "ingress-authproxy/internal/apiserver/admin/policy/v1/repo"
 	policyRepoMysql "ingress-authproxy/internal/apiserver/admin/policy/v1/repo/mysql"
-	userCtl "ingress-authproxy/internal/apiserver/admin/user/v1/controller"
-	userRepo "ingress-authproxy/internal/apiserver/admin/user/v1/repo"
-	userRepoMysql "ingress-authproxy/internal/apiserver/admin/user/v1/repo/mysql"
+	adminUserCtl "ingress-authproxy/internal/apiserver/admin/user/v1/controller"
+	userCtl "ingress-authproxy/internal/apiserver/user/v1/controller"
+
+	adminUserRepo "ingress-authproxy/internal/apiserver/admin/user/v1/repo"
+	adminUserRepoMysql "ingress-authproxy/internal/apiserver/admin/user/v1/repo/mysql"
 	authCtl "ingress-authproxy/internal/apiserver/auth/v1/controller"
 	authRepo "ingress-authproxy/internal/apiserver/auth/v1/repo"
 	authRepoLadon "ingress-authproxy/internal/apiserver/auth/v1/repo/ladon"
@@ -35,46 +37,45 @@ func installPingGroup(router *gin.Engine) {
 
 // InstallAPIs install generic apis.
 func installMiscAPIs(router *gin.Engine) {
-	router.GET("/healthz", func(c *gin.Context) {
+	router.GET(AuthProxyLayout.Healthz, func(c *gin.Context) {
 		c.String(http.StatusOK, "OK")
 	})
 
-	router.GET("/version", func(c *gin.Context) {
+	router.GET(AuthProxyLayout.Version, func(c *gin.Context) {
 		c.String(http.StatusOK, version.GitVersion)
 	})
 
-	router.GET(filepath.Join(AuthProxyLayout.V1.Self, "/healthz"), func(c *gin.Context) {
+	router.GET(filepath.Join(AuthProxyLayout.V1.Self, AuthProxyLayout.V1.Healthz), func(c *gin.Context) {
 		c.String(http.StatusOK, "OK")
 	})
 
-	router.GET(filepath.Join(AuthProxyLayout.V1.Self, "/version"), func(c *gin.Context) {
+	router.GET(filepath.Join(AuthProxyLayout.V1.Self, AuthProxyLayout.V1.Version), func(c *gin.Context) {
 		c.String(http.StatusOK, version.GitVersion)
 	})
 
 }
 
-func installV1Group(router *gin.Engine, jwt *jwt.GinJWTMiddleware) {
+func installV1Group(router *gin.Engine) *gin.RouterGroup {
+	v1API := router.Group(AuthProxyLayout.V1.Self)
+	return v1API
+}
+
+func installAdminGroup(v1API *gin.RouterGroup, jwt *jwt.GinJWTMiddleware) {
 
 	/** 路由组 **/
-
-	/** 如果开启认证，则创建认证路由组，否则创建普通路由组 **/
-	_, _ = auth.CreateJWTAuthGroup(router, jwt, AuthProxyLayout.V1.Self)
-
-	v1API := router.Group(AuthProxyLayout.V1.Self)
-
 	adminPath, _ := filepath.Rel(AuthProxyLayout.V1.Self, AuthProxyLayout.V1.Admin.Self)
-	adminGrp := v1API.Group(adminPath)
+	adminGrp, _ := auth.CreateJWTAuthGroup(v1API, jwt, adminPath)
 	_ = auth.MakeJWTAuthGroup(adminGrp, jwt)
 	{
 		userPath := AuthProxyLayout.V1.Admin.Users
 		userGrp := adminGrp.Group(userPath)
 		{
-			userRepoClient, err := userRepoMysql.Repo(&config.GlobalServerDesc.Opt.MySQL)
+			userRepoClient, err := adminUserRepoMysql.Repo(&config.GlobalServerDesc.Opt.MySQL)
 			if err != nil {
 				log.Fatalf("failed to create Mysql repo: %s", err.Error())
 			}
-			userRepo.SetClient(userRepoClient)
-			userController := userCtl.NewController(userRepoClient)
+			adminUserRepo.SetClient(userRepoClient)
+			userController := adminUserCtl.NewController(userRepoClient)
 
 			userGrp.POST("", userController.Create)
 			userGrp.DELETE(":name", userController.Delete)
@@ -97,16 +98,17 @@ func installV1Group(router *gin.Engine, jwt *jwt.GinJWTMiddleware) {
 			policyGrp.GET("", policyController.List)
 		}
 
+		serverPath, _ := filepath.Rel(AuthProxyLayout.V1.Admin.Self, AuthProxyLayout.V1.Admin.Server.Self)
 		if config.GlobalServerDesc.Opt.Debug {
-			adminGrp.GET("server/option", func(c *gin.Context) {
+			adminGrp.GET(filepath.Join(serverPath, AuthProxyLayout.V1.Admin.Server.Option), func(c *gin.Context) {
 				c.JSON(http.StatusOK, config.GlobalServerDesc.Opt)
 			})
 		} else {
-			adminGrp.GET("server/option", func(c *gin.Context) {
+			adminGrp.GET(filepath.Join(serverPath, AuthProxyLayout.V1.Admin.Server.Option), func(c *gin.Context) {
 				c.JSON(http.StatusForbidden, gin.H{"code": http.StatusForbidden, "message": "config disabled in non-debug mode"})
 			})
 		}
-		adminGrp.POST("server/shutdown", func(c *gin.Context) {
+		adminGrp.POST(filepath.Join(serverPath, AuthProxyLayout.V1.Admin.Server.Shutdown), func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "server shutdown"})
 			c.Done()
 			go func() {
@@ -114,12 +116,20 @@ func installV1Group(router *gin.Engine, jwt *jwt.GinJWTMiddleware) {
 				os.Exit(0)
 			}()
 		})
+		adminGrp.POST(filepath.Join(serverPath, AuthProxyLayout.V1.Admin.Server.Sync), func(c *gin.Context) {
+			authRepo.Client().AuthzRepo().Trigger()
+			c.JSON(http.StatusOK, gin.H{"message": "triggered sync"})
+			c.Done()
+		})
 	}
+}
+
+func installAuthGroup(v1API *gin.RouterGroup) {
 
 	ingressAuthPath, _ := filepath.Rel(AuthProxyLayout.V1.Self, AuthProxyLayout.V1.IngressAuth.Self)
 	ingressAuthGrp := v1API.Group(ingressAuthPath)
 	{
-		authRepoClient, _ := authRepoLadon.Repo(userRepo.Client().UserRepo(), policyRepo.Client().PolicyRepo())
+		authRepoClient, _ := authRepoLadon.Repo(adminUserRepo.Client().UserRepo(), policyRepo.Client().PolicyRepo())
 		authRepo.SetClient(authRepoClient)
 
 		authController := authCtl.NewController(authRepoClient)
@@ -127,28 +137,41 @@ func installV1Group(router *gin.Engine, jwt *jwt.GinJWTMiddleware) {
 		ingressAuthGrp.GET(":resource", authController.BasicAuthz)
 	}
 }
+func installUserGroup(v1API *gin.RouterGroup, strategy auth.BasicAuthStrategy) {
 
-func installJWTGroup(router *gin.Engine) (*jwt.GinJWTMiddleware, error) {
+	userPath := AuthProxyLayout.V1.User
+	userPathGrp := v1API.Group(userPath, strategy.AuthFunc())
+	{
+		userRepoClient := adminUserRepo.Client().UserRepo()
+		userController := userCtl.NewController(userRepoClient)
 
-	ginJWT, _ := auth.RegisterAuthModule(
-		router,
-		AuthProxyLayout.V1.JWT.Self,
-		AuthProxyLayout.V1.JWT.Login,
-		AuthProxyLayout.V1.JWT.Refresh,
-		time.Second*2*3600,
-		adminAuth,
-		adminAuthz,
-		config.GlobalServerDesc.Opt.JWT.Secret,
-		config.GlobalServerDesc.Opt.Network.Domain)
-	return ginJWT, nil
+		userPathGrp.GET(":name", userController.Get)
+		userPathGrp.PUT(":name", userController.Update)
 
+	}
 }
 
 func installGinServer() *gin.Engine {
 	router := gin.Default()
-	ginJWT, _ := installJWTGroup(router)
+
+	adminJWT, _ := auth.NewJWTAuthStrategy(time.Second*2*3600,
+		adminAuth,
+		adminAuthz,
+		config.GlobalServerDesc.Opt.JWT.Secret,
+		config.GlobalServerDesc.Opt.Network.Domain)
+	_ = auth.RegisterAuthModule(router,
+		AuthProxyLayout.V1.JWT.Self,
+		AuthProxyLayout.V1.JWT.Login,
+		AuthProxyLayout.V1.JWT.Refresh, adminJWT)
+
 	installPingGroup(router)
-	installV1Group(router, ginJWT)
+	v1API := installV1Group(router)
+	installAdminGroup(v1API, adminJWT)
+	installAuthGroup(v1API)
+
+	userAuth := auth.NewBasicAuthStrategy(userAuth)
+	installUserGroup(v1API, userAuth)
+
 	installMiscAPIs(router)
 	return router
 }

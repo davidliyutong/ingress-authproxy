@@ -26,6 +26,9 @@ func (u *userService) Create(user *model.User) error {
 	user.Password = string(hashedBytes)
 	user.Status = 1
 	user.LoginedAt = time.Now()
+	if user.Name == "" {
+		user.Name = user.Nickname
+	}
 
 	return u.repo.UserRepo().Create(user)
 }

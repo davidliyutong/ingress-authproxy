@@ -6,6 +6,7 @@ import Policies from "./components/Policies.vue"
 import Secrets from "./components/Secrets.vue"
 
 import Login from "./components/Login.vue";
+import PasswordReset from "@/components/PasswordReset.vue";
 import Profile from "@/components/Profile.vue";
 import Settings from "@/components/Settings.vue";
 import App from "@/App.vue";
@@ -23,6 +24,11 @@ const routes = [
         path: "/",
         name: "login",
         component: Login,
+    },
+    {
+        path: "/passwordreset",
+        name: "passwordreset",
+        component: PasswordReset,
     },
     {
         path: "/admin",
@@ -95,7 +101,7 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
     let token = localStorage.getItem("token")
     if (token == null || token === '') {
-        if (to.path === '/') {
+        if (to.path === '/' || to.path === '/passwordreset') {
             next();
         } else {
             next({name: 'login'});

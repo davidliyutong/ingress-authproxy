@@ -21,6 +21,7 @@ type JWTResponse struct {
 }
 
 const IdentityKeyStr = "uid"
+const IsAdminStr = "is_admin"
 
 type JWTStrategy struct {
 	ginjwt.GinJWTMiddleware
@@ -28,39 +29,32 @@ type JWTStrategy struct {
 
 var _ AuthStrategy = &JWTStrategy{}
 
-func NewJWTStrategy(gjwt ginjwt.GinJWTMiddleware) JWTStrategy {
-	return JWTStrategy{gjwt}
-}
-
 func (strategy JWTStrategy) AuthFunc() gin.HandlerFunc {
 	return strategy.MiddlewareFunc()
 }
 
 func MakeJWTAuthGroup(authGroup *gin.RouterGroup, ginJWT *ginjwt.GinJWTMiddleware) error {
-	authStrategy := NewJWTStrategy(*ginJWT)
+	authStrategy := JWTStrategy{*ginJWT}
 	authGroup.Use(authStrategy.AuthFunc())
 
 	return nil
 }
 
-func CreateJWTAuthGroup(ginEngine *gin.Engine, ginJWT *ginjwt.GinJWTMiddleware, relativePath string) (*gin.RouterGroup, error) {
-	authStrategy := NewJWTStrategy(*ginJWT)
-	authGroup := ginEngine.Group(relativePath)
+func CreateJWTAuthGroup(router *gin.RouterGroup, ginJWT *ginjwt.GinJWTMiddleware, relativePath string) (*gin.RouterGroup, error) {
+	authStrategy := JWTStrategy{*ginJWT}
+	authGroup := router.Group(relativePath)
 	authGroup.Use(authStrategy.AuthFunc())
 
 	return authGroup, nil
 }
 
-func RegisterAuthModule(
-	engine *gin.Engine,
-	basePath string,
-	loginPath string,
-	tokenRefreshPath string,
+func NewJWTAuthStrategy(
 	timeout time.Duration,
 	authnFn func(string, string) bool,
 	authzFn func(string, *gin.Context) bool,
 	jwtDomain string,
-	jwtSecret string) (*ginjwt.GinJWTMiddleware, error) {
+	jwtSecret string,
+) (*ginjwt.GinJWTMiddleware, error) {
 	ginJWT, _ := ginjwt.New(&ginjwt.GinJWTMiddleware{
 		Realm:            jwtDomain,
 		SigningAlgorithm: "HS256",
@@ -75,7 +69,7 @@ func RegisterAuthModule(
 			accessKey := loginValues.AccessKey
 			secretKey := loginValues.SecretKey
 
-			if authnFn(accessKey, secretKey) {
+			if ok := authnFn(accessKey, secretKey); ok {
 				return &User{
 					Identity: accessKey,
 				}, nil
@@ -117,12 +111,19 @@ func RegisterAuthModule(
 		SendCookie:    true,
 		TimeFunc:      time.Now,
 	})
-
-	authStrategy := NewJWTStrategy(*ginJWT)
-
-	group := engine.Group(basePath)
-	group.POST(loginPath, authStrategy.LoginHandler)
-	group.POST(tokenRefreshPath, authStrategy.RefreshHandler)
-
 	return ginJWT, nil
+}
+
+func RegisterAuthModule(
+	engine *gin.Engine,
+	basePath string,
+	loginPath string,
+	tokenRefreshPath string,
+	ginJWT *ginjwt.GinJWTMiddleware,
+) *gin.RouterGroup {
+	group := engine.Group(basePath)
+	strategy := JWTStrategy{*ginJWT}
+	group.POST(loginPath, strategy.LoginHandler)
+	group.POST(tokenRefreshPath, strategy.RefreshHandler)
+	return group
 }

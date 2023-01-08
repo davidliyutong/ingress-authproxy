@@ -35,9 +35,9 @@ func (a authzService) Authenticate(username string, password string, resource st
 	}()
 
 	authRequest := ladon.Request{
-		Subject:  username,
+		Subject:  "users:" + username,
 		Action:   "get",
-		Resource: "resources:" + resource,
+		Resource: "resources:ingress-auth:" + resource,
 	}
 	err = a.repo.AuthzRepo().Validate(&authRequest)
 	if err != nil {

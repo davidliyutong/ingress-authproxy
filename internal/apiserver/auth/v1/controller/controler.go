@@ -49,7 +49,8 @@ func (c2 controller) BasicAuthz(c *gin.Context) {
 	}
 
 	c.Set(v1.UsernameKey, pair[0])
-	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+	c.Header("X-Forwarded-User", pair[0])
+	c.JSON(http.StatusOK, gin.H{"authenticated": true, "user": pair[0]})
 }
 
 func NewController(repo repo.Repo) Controller {

@@ -6,6 +6,7 @@ type LayoutAdmin struct {
 	Policies string
 	Secrets  string
 	Info     string
+	Server   LayoutServer
 }
 
 type LayoutJWT struct {
@@ -18,16 +19,33 @@ type LayoutIngressAuth struct {
 	Self string
 }
 
+type LayoutServer struct {
+	Self     string
+	Option   string
+	Shutdown string
+	Sync     string
+}
+
+//type LayoutUser struct {
+//	Self string
+//}
+
 type LayoutV1 struct {
 	Self        string
 	Admin       LayoutAdmin
+	User        string
 	IngressAuth LayoutIngressAuth
 	JWT         LayoutJWT
+	Server      LayoutServer
+	Healthz     string
+	Version     string
 }
 
 type Layout struct {
-	Ping string
-	V1   LayoutV1
+	Ping    string
+	V1      LayoutV1
+	Healthz string
+	Version string
 }
 
 var AuthProxyLayout = Layout{
@@ -41,7 +59,15 @@ var AuthProxyLayout = Layout{
 			Policies: "policies",
 			Secrets:  "secrets",
 			Info:     "info",
+			Server: LayoutServer{
+				Self:     "/v1/admin/server",
+				Option:   "option",
+				Shutdown: "shutdown",
+				Sync:     "sync",
+			},
 		},
+
+		User: "user",
 
 		IngressAuth: LayoutIngressAuth{
 			Self: "/v1/ingress-auth",
@@ -51,5 +77,9 @@ var AuthProxyLayout = Layout{
 			Login:   "login",
 			Refresh: "refresh",
 		},
+		Healthz: "healthz",
+		Version: "version",
 	},
+	Healthz: "healthz",
+	Version: "version",
 }

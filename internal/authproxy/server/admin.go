@@ -74,9 +74,10 @@ func adminAuth(username string, password string) bool {
 	_ = userRepo.Client().UserRepo().Update(user)
 
 	return true
+
 }
 
-func adminAuthz(username string, c *gin.Context) bool {
+func adminAuthz(u string, c *gin.Context) bool {
 	return true
 }
 
@@ -91,16 +92,12 @@ func userAuth(username string, password string) bool {
 	}
 
 	log.Debugln("user:", user.Name, "is admin:", user.IsAdmin)
-	if !(user.IsAdmin == 1) {
-		return false
-	}
-
 	user.LoginedAt = time.Now()
 	_ = userRepo.Client().UserRepo().Update(user)
 
 	return true
 }
 
-func userAuthz(username string, c *gin.Context) bool {
+func userAuthz(u string, c *gin.Context) bool {
 	return true
 }

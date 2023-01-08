@@ -39,6 +39,9 @@ func (p *policyService) Delete(policyName string) error {
 }
 
 func (p *policyService) Update(policy *model.Policy) error {
+	if policy.AuthzPolicy.DefaultPolicy.ID == "" {
+		policy.AuthzPolicy.DefaultPolicy.ID = utils.MustGenerateUUID()
+	}
 	err := p.repo.PolicyRepo().Update(policy)
 	if err == nil {
 		authRepo.Client().AuthzRepo().Trigger()

@@ -21,10 +21,9 @@ axios.defaults.baseURL = '/';
 
 
 axios.interceptors.request.use(config => {
-        // eslint-disable-next-line no-empty
         if (config.push !== '/')  {
             let token = localStorage.getItem('token')
-            if (token) {
+            if (token !== null && token !== '') {
                 config.headers.Authorization = "Bearer " + token;
             }
         }

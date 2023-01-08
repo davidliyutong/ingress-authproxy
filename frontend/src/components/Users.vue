@@ -102,6 +102,13 @@
               inset
               vertical
           ></v-divider>
+          <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="Search"
+              single-line
+              hide-details
+          ></v-text-field>
           <v-spacer></v-spacer>
           <v-btn color="primary" @click="initialize">Refresh</v-btn>
           <v-dialog v-model="dialog" max-width="500px">
@@ -214,7 +221,7 @@ async function updateUser(user) {
     } else {
       user.isAdmin = 0
     }
-    console.log(user)
+    // console.log(user)
     await axios.put(targetURL, JSON.stringify(user)
     ).then(response => {
       if (response.status === 200) {
@@ -319,7 +326,7 @@ export default {
       this.editedIndex = this.userItems.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialog = true
-      console.log(this.editedIndex, this.editedItem)
+      // console.log(this.editedIndex, this.editedItem)
     },
 
     async deleteItem(item) {

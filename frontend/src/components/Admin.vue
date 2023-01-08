@@ -33,14 +33,14 @@
             <v-list-item-title>Policies</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link to="/admin/secrets">
-          <v-list-item-action>
-            <v-icon>mdi-key-variant</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Secrets</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+<!--        <v-list-item link to="/admin/secrets">-->
+<!--          <v-list-item-action>-->
+<!--            <v-icon>mdi-key-variant</v-icon>-->
+<!--          </v-list-item-action>-->
+<!--          <v-list-item-content>-->
+<!--            <v-list-item-title>Secrets</v-list-item-title>-->
+<!--          </v-list-item-content>-->
+<!--        </v-list-item>-->
       </v-list>
       <template v-slot:append>
         <v-list dense nav>
@@ -129,7 +129,7 @@
     </v-main>
 
     <v-footer color="primary" app>
-      <span class="white--text">&copy; 2023</span>
+      <span class="white--text">&copy; 2023 davidliyutong@sjtu.edu.cn</span>
 <!--      <v-spacer></v-spacer>-->
 <!--      <span class="white&#45;&#45;text">{{ username }}</span>-->
     </v-footer>

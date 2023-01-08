@@ -24,9 +24,9 @@ services:
       AUTHPROXY_MYSQL_PASSWORD: authproxy
       AUTHPROXY_MYSQL_HOSTNAME: db
       AUTHPROXY_MYSQL_PORT: 3306
-#      AUTHPROXY_DEBUG: 1
-#      AUTHPROXY_INIT_USERNAME: admin
-#      AUTHPROXY_INIT_PASSWORD: admin
+      AUTHPROXY_DEBUG: 1 # 0 for production
+      AUTHPROXY_INIT_USERNAME: admin
+      AUTHPROXY_INIT_PASSWORD: admin123456
 
   authproxy-frontend:
     image: davidliyutong/ingress-authproxy-frontend
@@ -34,4 +34,4 @@ services:
     ports:
       - "8080:80"
     environment:
-      AUTHPROXY_BACKEND_URL: "http://authproxy-backend:50032"
+      AUTHPROXY_BACKEND_URL: "http://authproxy-backend:50032" # points to authproxy-backend
