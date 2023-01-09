@@ -42,7 +42,7 @@ Navigate to the policy panel, then create a policy that grants Alice access to t
 
 ![CreatePolicy](img/20230109032346.png)
 
-The server will now authorize Alice's access to /v1/ingress-auth/test1. This is an Resfull API that returns an json object according to K8S ingress specifications.
+The server will now authorize Alice's access to `/v1/ingress-auth/test1`. This is an Resfull API that returns an json object according to K8S ingress specifications.
 
 ```json
 {"authenticated":true,"user":"alice"}
@@ -113,7 +113,7 @@ To protect target K8S ingress resource, add this snippet to its annotations
 ```yaml
 annotations:
   nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-User
-  nginx.ingress.kubernetes.io/auth-url: "http://ingress-authproxy.<namespace>.svc.cluster.local/ingress-auth/<resource>"
+  nginx.ingress.kubernetes.io/auth-url: "http://ingress-authproxy.<namespace>.svc.cluster.local/v1/ingress-auth/<resource>"
 ```
 
 Hint: Replace `<namespace>` and `<resources>` with deployed namespace of ingress authproxy and the name of resource.
@@ -154,7 +154,7 @@ Change the annotation if you like:
 ```yaml
 annotations:
   nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-User
-  nginx.ingress.kubernetes.io/auth-url: "https://authproxy.example.com/ingress-auth/<resource>"
+  nginx.ingress.kubernetes.io/auth-url: "https://authproxy.example.com/v1/ingress-auth/<resource>"
 ```
 
 The user can reset their password at [https://authproxy.example.com/passwordreset](https://authproxy.example.com/passwordreset)

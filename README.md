@@ -18,6 +18,10 @@ An authorization server compatible with kubernetes ingress controllers.
   <a href="https://github.com/davidliyutong/ingress-authproxy/releases">
     <img src="https://img.shields.io/github/release/davidliyutong/ingress-authproxy.svg" alt="GitHub release">
   </a>
+    <a href="https://github.com/davidliyutong/ingress-authproxy/actions/workflows/build-release-binary.yml">
+    <img src="https://github.com/davidliyutong/ingress-authproxy/workflows/build-release-binary/badge.svg" alt="GitHub Action">
+  </a>
+
 </p>
 
 Ingress AuthProxy provides authorization service for Kubernetes Ingress Controllers. It supports rule based access policies and has an easy-to-user management WebUI.
@@ -38,7 +42,7 @@ The Ingress Authproxy contains a frontend and a backend. The frontend is an ngin
 | `/`              | Login Page                                   |
 | `/passwordreset` | Self-serviced password reset page            |
 | `/admin`         | Admin page, only accessible to system admins |
-| `/v1`            | Proxied to backend server                    |
+| `/v1/*`          | Proxied to backend server `/v1/`             |
 
 The frontend webserver is configured so that `/v1/` path is proxied to `$AUTHPROXY_BACKEND_URL/v1/`, where `$AUTHPROXY_BACKEND_URL` is an environment variable passed when launching the frontend container.
 
@@ -85,7 +89,7 @@ To protect target K8S ingress resource, add this snippet to its annotations.
 ```yaml
 annotations:
     nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-User
-    nginx.ingress.kubernetes.io/auth-url: "http://ingress-authproxy.<namespace>.svc.cluster.local/ingress-auth/<resource>"
+    nginx.ingress.kubernetes.io/auth-url: "http://ingress-authproxy.<namespace>.svc.cluster.local/v1/ingress-auth/<resource>"
 ```
 
 Hint: Replace `<namespace>` and `<resources>` with deployed namespace of ingress authproxy and the name of resource.
@@ -125,8 +129,8 @@ The Ingress AuthProxy contains an Vue frontend. Here are some important director
 
 This project use `make`. Available make commands are:
 
-| Command                          | Description                                |
-| -------------------------------- | ------------------------------------------ |
+| Command              | Description                                |
+| -------------------- | ------------------------------------------ |
 | `build`/`go.build`   | Build go binaries                          |
 | `image`,`image.push` | Build and push docker images to Docker Hub |
 | `demo`,`demo.stop`   | Start and stop demo with `docker-compose`  |
