@@ -2,8 +2,8 @@
 -- Use of this source code is governed by a MIT style
 -- license that can be found in the LICENSE file.
 
--- CREATE DATABASE  IF NOT EXISTS `authproxy` /*!40100 DEFAULT CHARACTER SET utf8 */;
--- USE `authproxy`;
+CREATE DATABASE  IF NOT EXISTS `authproxy` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `authproxy`;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;

@@ -47,8 +47,10 @@ func (u *userService) Update(user *model.User) error {
 
 	updateUser.Status = user.Status
 	updateUser.Nickname = user.Nickname
-	hashedBytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	updateUser.Password = string(hashedBytes)
+	if user.Password != "" {
+		hashedBytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		updateUser.Password = string(hashedBytes)
+	}
 	updateUser.Email = user.Email
 	updateUser.Phone = user.Phone
 	updateUser.Extend = user.Extend

@@ -131,10 +131,10 @@
                   <v-text-field v-model="editedItem.phone" label="Phone"></v-text-field>
                   <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
                   <v-text-field v-model="editedItem.status" label="Status"></v-text-field>
-                  <v-text-field v-model="password" label="New Password" placeholder="password"
+                  <v-text-field v-model="editedItem.password" label="New Password" placeholder="password"
                                 type="password"></v-text-field>
-                  <v-text-field v-model="confirm" label="Confirm Password" placeholder="confirm"
-                                type="confirm"></v-text-field>
+                  <v-text-field v-model="editedItem.confirm" label="Confirm Password" placeholder="confirm"
+                                type="password"></v-text-field>
                   <v-checkbox
                       v-model="editedItem.isAdmin"
                       label="Is Admin"
@@ -220,6 +220,10 @@ async function updateUser(user) {
     } else {
       user.isAdmin = 0
     }
+    if (user.password !== user.confirm) {
+      this.$message.bottom().error("Password and confirm password are not the same")
+      return false
+    }
     // console.log(user)
     await axios.put(targetURL, JSON.stringify(user)
     ).then(response => {
@@ -290,6 +294,8 @@ export default {
       email: '',
       status: 1,
       isAdmin: 0,
+      password: '',
+      confirm: '',
     },
     defaultItem: {
       name: '',
@@ -298,6 +304,8 @@ export default {
       email: '',
       status: 1,
       isAdmin: 0,
+      password: '',
+      confirm: '',
     },
     dialog: false,
   }),
