@@ -30,12 +30,12 @@ Ingress AuthProxy provides authorization service for Kubernetes Ingress Controll
 
 -   ✅ Control access to K8S ingress resources
 -   🔑 Access policies based on Ladon
--   🔌 A manaagement frontend UI that is powered by Vuetify
+-   🔌 A management frontend UI that is powered by Vuetify
 -   😀 Self-serviced password reset
 
 ## Architecture
 
-The Ingress Authproxy contains a frontend and a backend. The frontend is an nginx server that serves at the following routes:
+The Ingress Authproxy contains a frontend and a backend. The frontend is an nginx server that serves the following routes:
 
 | Route            | Description                                  |
 | ---------------- | -------------------------------------------- |
@@ -71,6 +71,21 @@ docker-compose up -d
 ```
 
 This will launch 3 containers: a mysql database, an auth backend and an auth frontend. You can access the frontend from [http://localhost:8080](http://localhost:8080). A default admin user will be created with password `admin123456`
+
+Here is a list of configurable parameters
+
+| Name                     | Type   | Default     | Explanation                     |
+| ------------------------ | ------ | ----------- | ------------------------------- |
+| AUTHPROXY_MYSQL_DATABASE | string | authproxy   | MySQL database name             |
+| AUTHPROXY_MYSQL_USERNAME | string | authproxy   | MySQL username                  |
+| AUTHPROXY_MYSQL_PASSWORD | string | authproxy   | MySQL password                  |
+| AUTHPROXY_MYSQL_HOSTNAME | string | db          | MySQL hostname                  |
+| AUTHPROXY_MYSQL_PORT     | int    | 3306        | MySQL port                      |
+| AUTHPROXY_DEBUG          | string | 1           | '0' disable or '1' toggle deubg |
+| AUTHPROXY_INIT_USERNAME  | string | admin       | default admin user's name       |
+| AUTHPROXY_INIT_PASSWORD  | string | admin123456 | default admin user's password   |
+
+> By default this docker-compose.yml do not persistent data, everything will be lost on container destruction.
 
 For deployment in kubernetes clusters, use the `manifests/k8s/deployment.yaml`:
 

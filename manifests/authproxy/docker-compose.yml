@@ -18,6 +18,8 @@ services:
     restart: unless-stopped
     ports:
       - "50032:50032"
+    # volumes:
+    #   - mysql:/var/lib/mysql
     environment:
       AUTHPROXY_MYSQL_DATABASE: authproxy
       AUTHPROXY_MYSQL_USERNAME: authproxy
@@ -35,3 +37,6 @@ services:
       - "8080:80"
     environment:
       AUTHPROXY_BACKEND_URL: "http://authproxy-backend:50032" # points to authproxy-backend
+
+# volumes:
+#  mysql:

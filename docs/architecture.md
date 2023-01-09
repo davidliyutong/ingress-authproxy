@@ -78,6 +78,8 @@ nginx -g 'daemon off;'
 
 ## Backend
 
+Backend server API 功能
+
 | Route                                  | Description                                                                        | Authentication            | Access Policy |
 | -------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------- | ------------- |
 | `/v1/jwt/<login,refresh>`              | JWt creation                                                                       | username, password (POST) | admin only    |
