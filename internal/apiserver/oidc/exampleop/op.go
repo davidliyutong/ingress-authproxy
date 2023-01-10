@@ -3,7 +3,7 @@ package exampleop
 import (
 	"context"
 	"crypto/sha256"
-	"github.com/gin-gonic/gin"
+	"ingress-authproxy/internal/apiserver/oidc/model"
 	"log"
 	"net/http"
 	"os"
@@ -11,7 +11,6 @@ import (
 	"github.com/gorilla/mux"
 	"golang.org/x/text/language"
 
-	"github.com/zitadel/oidc/example/server/storage"
 	"github.com/zitadel/oidc/pkg/op"
 )
 
@@ -20,10 +19,10 @@ const (
 )
 
 func init() {
-	storage.RegisterClients(
-		storage.NativeClient("native"),
-		storage.WebClient("web", "secret"),
-		storage.WebClient("api", "secret"),
+	model.RegisterClients(
+		model.NativeClient("native"),
+		model.WebClient("web", "secret"),
+		model.WebClient("api", "secret"),
 	)
 }
 
@@ -35,7 +34,7 @@ type Storage interface {
 // SetupServer creates an OIDC server with Issuer=http://localhost:<port>
 //
 // Use one of the pre-made clients in storage/clients.go or register a new one.
-func SetupServer(ctx context.Context, r *gin.Engine, issuer string, prefix string, storage Storage) *mux.Router {
+func SetupServer(ctx context.Context, issuer string, prefix string, storage Storage) *mux.Router {
 	// this will allow us to use an issuer with http:// instead of https://
 	os.Setenv(op.OidcDevMode, "true")
 
@@ -44,10 +43,14 @@ func SetupServer(ctx context.Context, r *gin.Engine, issuer string, prefix strin
 	key := sha256.Sum256([]byte("test"))
 
 	router := mux.NewRouter()
-	r.Any(prefix+"/"+pathLoggedOut, func(c *gin.Context) {
-		c.String(http.StatusOK, "You have been logged out")
+
+	// for simplicity, we provide a very small default page for users who have signed out
+	router.HandleFunc(pathLoggedOut, func(w http.ResponseWriter, req *http.Request) {
+		_, err := w.Write([]byte("signed out successfully"))
+		if err != nil {
+			log.Printf("error serving logged out page: %v", err)
+		}
 	})
-	grp := r.Group(prefix)
 
 	// creation of the OpenIDProvider with the just created in-memory Storage
 	provider, err := newOP(ctx, storage, issuer, key)
@@ -57,14 +60,18 @@ func SetupServer(ctx context.Context, r *gin.Engine, issuer string, prefix strin
 
 	// the provider will only take care of the OpenID Protocol, so there must be some sort of UI for the login process
 	// for the simplicity of the example this means a simple page with username and password field
-	_ = NewLogin(storage, grp, op.AuthCallbackURL(provider))
+	l := NewLogin(storage, op.AuthCallbackURL(provider))
+
+	// regardless of how many pages / steps there are in the process, the UI must be registered in the router,
+	// so we will direct all calls to /login to the login UI
+	router.PathPrefix(prefix + "/login/").Handler(http.StripPrefix(prefix+"/login", l.router))
 
 	// we register the http handler of the OP on the root, so that the discovery endpoint (/.well-known/openid-configuration)
 	// is served on the correct path
 	//
 	// if your issuer ends with a path (e.g. http://localhost:9998/custom/path/),
 	// then you would have to set the path prefix (/custom/path/)
-	router.PathPrefix("/").Handler(provider.HttpHandler())
+	router.PathPrefix(prefix + "/").Handler(http.StripPrefix(prefix, provider.HttpHandler()))
 
 	return router
 }

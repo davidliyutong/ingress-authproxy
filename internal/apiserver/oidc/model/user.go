@@ -1,4 +1,4 @@
-package storage
+package model
 
 import (
 	"crypto/rsa"
@@ -20,7 +20,7 @@ type User struct {
 }
 
 type Service struct {
-	keys map[string]*rsa.PublicKey
+	Keys map[string]*rsa.PublicKey
 }
 
 type UserStore interface {

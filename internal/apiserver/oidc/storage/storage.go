@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"fmt"
+	"ingress-authproxy/internal/apiserver/oidc/model"
 	"math/big"
 	"sync"
 	"time"
@@ -29,7 +30,7 @@ var serviceKey1 = &rsa.PublicKey{
 // var _ op.Storage = &storage{}
 // var _ op.ClientCredentialsStorage = &storage{}
 
-// storage implements the op.Storage interface
+// Storage implements the op.Storage interface
 // typically you would implement this as a layer on top of your database
 // for simplicity this example keeps everything in-memory
 type Storage struct {
@@ -37,9 +38,9 @@ type Storage struct {
 	authRequests  map[string]*AuthRequest
 	codes         map[string]string
 	tokens        map[string]*Token
-	clients       map[string]*Client
-	userStore     UserStore
-	services      map[string]Service
+	clients       map[string]*model.Client
+	userStore     model.UserStore
+	services      map[string]model.Service
 	refreshTokens map[string]*RefreshToken
 	signingKey    signingKey
 }
@@ -50,18 +51,18 @@ type signingKey struct {
 	Key       *rsa.PrivateKey
 }
 
-func NewStorage(userStore UserStore) *Storage {
+func NewStorage(userStore model.UserStore) *Storage {
 	key, _ := rsa.GenerateKey(rand.Reader, 2048)
 	return &Storage{
 		authRequests:  make(map[string]*AuthRequest),
 		codes:         make(map[string]string),
 		tokens:        make(map[string]*Token),
 		refreshTokens: make(map[string]*RefreshToken),
-		clients:       clients,
+		clients:       model.Clients,
 		userStore:     userStore,
-		services: map[string]Service{
+		services: map[string]model.Service{
 			userStore.ExampleClientID(): {
-				keys: map[string]*rsa.PublicKey{
+				Keys: map[string]*rsa.PublicKey{
 					"key1": serviceKey1,
 				},
 			},
@@ -348,7 +349,7 @@ func (s *Storage) AuthorizeClientIDSecret(ctx context.Context, clientID, clientS
 	}
 	// for this example we directly check the secret
 	// obviously you would not have the secret in plain text, but rather hashed and salted (e.g. using bcrypt)
-	if client.secret != clientSecret {
+	if client.GetSecret() != clientSecret {
 		return fmt.Errorf("invalid secret")
 	}
 	return nil
@@ -426,8 +427,8 @@ func (s *Storage) SetIntrospectionFromToken(ctx context.Context, introspection o
 func (s *Storage) GetPrivateClaimsFromScopes(ctx context.Context, userID, clientID string, scopes []string) (claims map[string]interface{}, err error) {
 	for _, scope := range scopes {
 		switch scope {
-		case CustomScope:
-			claims = appendClaim(claims, CustomClaim, customClaim(clientID))
+		case model.CustomScope:
+			claims = appendClaim(claims, model.CustomClaim, customClaim(clientID))
 		}
 	}
 	return claims, nil
@@ -442,7 +443,7 @@ func (s *Storage) GetKeyByIDAndUserID(ctx context.Context, keyID, clientID strin
 	if !ok {
 		return nil, fmt.Errorf("clientID not found")
 	}
-	key, ok := service.keys[keyID]
+	key, ok := service.Keys[keyID]
 	if !ok {
 		return nil, fmt.Errorf("key not found")
 	}
@@ -552,9 +553,9 @@ func (s *Storage) setUserinfo(ctx context.Context, userInfo oidc.UserInfoSetter,
 			userInfo.SetLocale(user.PreferredLanguage)
 		case oidc.ScopePhone:
 			userInfo.SetPhone(user.Phone, user.PhoneVerified)
-		case CustomScope:
+		case model.CustomScope:
 			// you can also have a custom scope and assert public or custom claims based on that
-			userInfo.AppendClaims(CustomClaim, customClaim(clientID))
+			userInfo.AppendClaims(model.CustomClaim, customClaim(clientID))
 		}
 	}
 	return nil

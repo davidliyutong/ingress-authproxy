@@ -10,6 +10,7 @@ import (
 	policyRepo "ingress-authproxy/internal/apiserver/admin/policy/v1/repo"
 	policyRepoMysql "ingress-authproxy/internal/apiserver/admin/policy/v1/repo/mysql"
 	adminUserCtl "ingress-authproxy/internal/apiserver/admin/user/v1/controller"
+	"ingress-authproxy/internal/apiserver/oidc"
 	userCtl "ingress-authproxy/internal/apiserver/user/v1/controller"
 
 	adminUserRepo "ingress-authproxy/internal/apiserver/admin/user/v1/repo"
@@ -243,6 +244,8 @@ func RunFunc(a AuthProxyAdmin) {
 	log.Infoln("mysql.port:", aVal.desc.Opt.MySQL.Port)
 	log.Infoln("mysql.database:", aVal.desc.Opt.MySQL.Database)
 	log.Debugln("jwt.secret:", aVal.desc.Opt.JWT.Secret)
+
+	go oidc.RunOIDCServer(&aVal.desc.Opt.OIDC)
 
 	_ = ginEngine.Run(aVal.desc.Opt.Network.Interface + ":" + strconv.Itoa(aVal.desc.Opt.Network.Port))
 }

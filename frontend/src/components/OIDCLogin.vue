@@ -11,35 +11,40 @@
                 <v-toolbar-title>OIDC Login</v-toolbar-title>
               </v-toolbar>
               <v-card-text>
-               Auth Request ID: {{ id }}
+                Auth Request ID: {{ id }}
               </v-card-text>
               <v-card-text class="align-center">
                 <form method="POST" action="/oidc/login/username">
                   <input
                       type="hidden" name="id" :value="id">
-                  <div class="v-input theme--light v-text-field v-text-field--is-booted v-text-field--placeholder">
+                  <div
+                      class="v-input v-input--is-focused theme--light v-text-field v-text-field--is-booted v-text-field--placeholder primary--text">
                     <div class="v-input__control">
                       <div class="v-input__slot">
-                        <div class="v-text-field__slot"><label for="input-52" class="v-label theme--light"
+                        <div class="v-text-field__slot"><label for="input-10"
+                                                               class="v-label v-label--active theme--light primary--text"
                                                                style="left: 0px; right: auto; position: absolute;">Username</label><input
-                            name="username" required="required" id="input-52" type="text"></div>
+                            name="username" required="required" id="input-10" type="text" placeholder=""></div>
                       </div>
                       <div class="v-text-field__details">
-                        <div class="v-messages theme--light">
+                        <div class="v-messages theme--light primary--text">
                           <div class="v-messages__wrapper"></div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div class="v-input theme--light v-text-field v-text-field--is-booted v-text-field--placeholder">
+                  <div
+                      class="v-input v-input--is-focused theme--light v-text-field v-text-field--is-booted v-text-field--placeholder primary--text">
                     <div class="v-input__control">
                       <div class="v-input__slot">
-                        <div class="v-text-field__slot"><label for="input-55" class="v-label theme--light"
+                        <div class="v-text-field__slot"><label for="input-13"
+                                                               class="v-label v-label--active theme--light primary--text"
                                                                style="left: 0px; right: auto; position: absolute;">Password</label><input
-                            name="password" required="required" id="input-55" type="password"></div>
+                            name="password" required="required" id="input-13" type="password" placeholder="">
+                        </div>
                       </div>
                       <div class="v-text-field__details">
-                        <div class="v-messages theme--light">
+                        <div class="v-messages theme--light primary--text">
                           <div class="v-messages__wrapper"></div>
                         </div>
                       </div>
@@ -73,20 +78,7 @@
                     </div>
                   </div>
                 </form>
-<!--                <form method="POST" action="/oidc/login/username" style="height: 200px; width: 200px;">-->
-<!--                  <div>-->
-<!--                    <label for="username">Username:</label>-->
-<!--                    <input id="username" name="username" style="width: 100%">-->
-<!--                  </div>-->
-
-<!--                  <div>-->
-<!--                    <label for="password">Password:</label>-->
-
-<!--                    <input id="password" name="password" style="width: 100%">-->
-<!--                  </div>-->
-<!--                  <button type="submit">Login</button>-->
-<!--                </form>-->
-                <!--                <form ref="form" @submit.prevent="login()">-->
+<!--                <form ref="form" @submit.prevent="login()">-->
                 <!--                  <v-text-field-->
                 <!--                      v-model="username"-->
                 <!--                      name="username"-->

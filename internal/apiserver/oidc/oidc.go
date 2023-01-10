@@ -3,25 +3,31 @@ package oidc
 import (
 	"context"
 	log "github.com/sirupsen/logrus"
-	"github.com/zitadel/oidc/example/server/exampleop"
-	"github.com/zitadel/oidc/example/server/storage"
+	"ingress-authproxy/internal/apiserver/oidc/model"
+	"ingress-authproxy/internal/config"
 	"net/http"
+	"strconv"
+
+	"ingress-authproxy/internal/apiserver/oidc/exampleop"
+	"ingress-authproxy/internal/apiserver/oidc/storage"
 )
 
-func runOIDCServer(port string) {
+func RunOIDCServer(opt *config.OIDCOpt) {
 	ctx := context.Background()
 
 	// the OpenIDProvider interface needs a Storage interface handling various checks and state manipulations
 	// this might be the layer for accessing your database
 	// in this example it will be handled in-memory
-	storage := storage.NewStorage(storage.NewUserStore())
+	s := storage.NewStorage(model.NewUserStore())
+	prefix := "/oidc"
 
-	router := exampleop.SetupServer(ctx, "http://localhost:"+port, storage)
+	router := exampleop.SetupServer(ctx, opt.BaseURL+opt.Prefix, prefix, s)
 
 	server := &http.Server{
-		Addr:    ":" + port,
+		Addr:    ":" + strconv.Itoa(int(opt.Port)),
 		Handler: router,
 	}
+	log.Infof("[OIDC Server] Serving OIDC at port %v", opt.Port)
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)

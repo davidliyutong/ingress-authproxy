@@ -27,6 +27,10 @@ const DefaultInterface = "0.0.0.0"
 const DefaultAppName = "authproxy"
 const DefaultConfigName = "nameserver"
 const DefaultTimeoutSecond = 2 * 3600
+const DefaultOIDCBaseURL = "http://localhost:8080"
+const DefaultOIDCPrefix = "/oidc"
+const DefaultOIDCPort = 9998
+
 const DefaultInitUsername = "admin"
 const DefaultInitPassword = "admin"
 
@@ -46,6 +50,13 @@ func SetGlobalDesc(desc *AuthProxyDesc) {
 	once.Do(func() {
 		GlobalServerDesc = desc
 	})
+}
+
+type OIDCOpt struct {
+	BaseURL   string `yaml:"base_url"`
+	Prefix    string `yaml:"prefix"`
+	Port      int64  `yaml:"port"`
+	LoginPath string `yaml:"login_path"`
 }
 
 type MySQLOpt struct {
@@ -85,6 +96,7 @@ type AuthProxyOpt struct {
 	Log     LogOpt     `yaml:"log"`
 	MySQL   MySQLOpt   `yaml:"mysql"`
 	JWT     JWTOpt     `yaml:"jwt"`
+	OIDC    OIDCOpt    `yaml:"oidc"`
 	Init    InitOpt    `yaml:"-"`
 }
 
@@ -143,6 +155,10 @@ func (o *AuthProxyDesc) Parse(cmd *cobra.Command) error {
 	vipCfg.SetDefault("mysql.username", "authproxy")
 	vipCfg.SetDefault("mysql.password", "authproxy")
 	vipCfg.SetDefault("jwt.expired", DefaultTimeoutSecond*time.Second)
+	vipCfg.SetDefault("oidc.baseurl", DefaultOIDCBaseURL)
+	vipCfg.SetDefault("oidc.prefix", DefaultOIDCPrefix)
+	vipCfg.SetDefault("oidc.port", DefaultOIDCPort)
+	vipCfg.SetDefault("oidc.loginpath", "")
 	vipCfg.SetDefault("init.username", DefaultInitUsername)
 	vipCfg.SetDefault("init.password", DefaultInitPassword)
 

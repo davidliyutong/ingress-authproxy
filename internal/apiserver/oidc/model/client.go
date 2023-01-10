@@ -1,4 +1,4 @@
-package storage
+package model
 
 import (
 	"time"
@@ -13,8 +13,8 @@ var (
 		return "/oidc-login?authRequestID=" + id
 	}
 
-	// clients to be used by the storage interface
-	clients = map[string]*Client{}
+	// Clients to be used by the storage interface
+	Clients = map[string]*Client{}
 )
 
 // Client represents the storage model of an OAuth/OIDC client
@@ -32,6 +32,11 @@ type Client struct {
 	devMode                        bool
 	idTokenUserinfoClaimsAssertion bool
 	clockSkew                      time.Duration
+}
+
+// GetSecret return client secret
+func (c *Client) GetSecret() string {
+	return c.secret
 }
 
 // GetID must return the client_id
@@ -106,7 +111,7 @@ func (c *Client) RestrictAdditionalAccessTokenScopes() func(scopes []string) []s
 }
 
 // IsScopeAllowed enables Client specific custom scopes validation
-// in this example we allow the CustomScope for all clients
+// in this example we allow the CustomScope for all Clients
 func (c *Client) IsScopeAllowed(scope string) bool {
 	return scope == CustomScope
 }
@@ -114,26 +119,26 @@ func (c *Client) IsScopeAllowed(scope string) bool {
 // IDTokenUserinfoClaimsAssertion allows specifying if claims of scope profile, email, phone and address are asserted into the id_token
 // even if an access token if issued which violates the OIDC Core spec
 // (5.4. Requesting Claims using Scope Values: https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims)
-// some clients though require that e.g. email is always in the id_token when requested even if an access_token is issued
+// some Clients though require that e.g. email is always in the id_token when requested even if an access_token is issued
 func (c *Client) IDTokenUserinfoClaimsAssertion() bool {
 	return c.idTokenUserinfoClaimsAssertion
 }
 
-// ClockSkew enables clients to instruct the OP to apply a clock skew on the various times and expirations
+// ClockSkew enables Clients to instruct the OP to apply a clock skew on the various times and expirations
 // (subtract from issued_at, add to expiration, ...)
 func (c *Client) ClockSkew() time.Duration {
 	return c.clockSkew
 }
 
-// RegisterClients enables you to register clients for the example implementation
-// there are some clients (web and native) to try out different cases
+// RegisterClients enables you to register Clients for the example implementation
+// there are some Clients (web and native) to try out different cases
 // add more if necessary
 //
 // RegisterClients should be called before the Storage is used so that there are
 // no race conditions.
 func RegisterClients(registerClients ...*Client) {
 	for _, client := range registerClients {
-		clients[client.id] = client
+		Clients[client.id] = client
 	}
 }
 

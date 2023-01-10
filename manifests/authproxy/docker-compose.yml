@@ -18,6 +18,7 @@ services:
     restart: unless-stopped
     ports:
       - "50032:50032"
+      - "9998:9998"
     # volumes:
     #   - mysql:/var/lib/mysql
     environment:
@@ -29,6 +30,10 @@ services:
       AUTHPROXY_DEBUG: 1 # 0 for production
       AUTHPROXY_INIT_USERNAME: admin
       AUTHPROXY_INIT_PASSWORD: admin123456
+      AUTHPROXY_OIDC_BASEURL: http://localhost:8080
+      AUTHPROXY_OIDC_PREFIX: /oidc
+      AUTHPROXY_OIDC_PORT: 9998
+
 
   authproxy-frontend:
     image: davidliyutong/ingress-authproxy-frontend
@@ -37,6 +42,6 @@ services:
       - "8080:80"
     environment:
       AUTHPROXY_BACKEND_URL: "http://authproxy-backend:50032" # points to authproxy-backend
-
+      AUTHPROXY_OIDC_SERVICE_URL: "http://authproxy-backend:9998"
 # volumes:
 #  mysql:
