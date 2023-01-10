@@ -11,6 +11,7 @@ import Profile from "@/components/Profile.vue";
 import Settings from "@/components/Settings.vue";
 import App from "@/App.vue";
 import Admin from "@/components/Admin.vue";
+import OIDCLogin from "@/components/OIDCLogin.vue";
 
 Vue.use(VueRouter);
 
@@ -24,6 +25,11 @@ const routes = [
         path: "/",
         name: "login",
         component: Login,
+    },
+    {
+        path: "/oidc-login",
+        name: "oidc-login",
+        component: OIDCLogin,
     },
     {
         path: "/passwordreset",
@@ -101,7 +107,7 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
     let token = localStorage.getItem("token")
     if (token == null || token === '') {
-        if (to.path === '/' || to.path === '/passwordreset') {
+        if (to.path === '/' || to.path === '/passwordreset' || to.path === '/oidc-login') {
             next();
         } else {
             next({name: 'login'});

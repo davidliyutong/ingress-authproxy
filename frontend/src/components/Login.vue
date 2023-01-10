@@ -75,7 +75,7 @@
                 <v-row>
                   <v-card-title class="mx-4">
                     <div class="white--text">
-                      Self Managed Password Reset
+                      Password Reset
                     </div>
                   </v-card-title>
                   <v-spacer></v-spacer>

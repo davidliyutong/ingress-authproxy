@@ -2,10 +2,9 @@ package exampleop
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"html/template"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 const (
@@ -43,23 +42,27 @@ var loginTmpl, _ = template.New("login").Parse(`
 
 type login struct {
 	authenticate authenticate
-	Router       *mux.Router
+	Router       *gin.RouterGroup
 	callback     func(string) string
 }
 
-func NewLogin(authenticate authenticate, callback func(string) string) *login {
+func NewLogin(authenticate authenticate, r *gin.RouterGroup, callback func(string) string) *login {
 	l := &login{
 		authenticate: authenticate,
 		callback:     callback,
 	}
-	l.createRouter()
+	l.createRouter(r)
 	return l
 }
 
-func (l *login) createRouter() {
-	l.Router = mux.NewRouter()
-	l.Router.Path("/username").Methods("GET").HandlerFunc(l.loginHandler)
-	l.Router.Path("/username").Methods("POST").HandlerFunc(l.checkLoginHandler)
+func (l *login) createRouter(r *gin.RouterGroup) {
+	l.Router = r
+	l.Router.GET("/login", func(c *gin.Context) {
+		l.loginHandler(c.Writer, c.Request)
+	})
+	l.Router.POST("/login", func(c *gin.Context) {
+		l.checkLoginHandler(c.Writer, c.Request)
+	})
 }
 
 type authenticate interface {
